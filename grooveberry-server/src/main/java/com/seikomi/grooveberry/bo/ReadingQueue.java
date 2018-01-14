@@ -2,6 +2,7 @@ package com.seikomi.grooveberry.bo;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -219,6 +220,24 @@ public final class ReadingQueue {
 	public void setCurrentTrackPostion(int index) {
 		this.currentTrackIndex = index;
 		this.currentTrack = this.queue.get(index);
+	}
+	
+	/**
+	 * Puts every track name of this reading queue in a map with his position as key.
+	 * @return
+	 * 		the map containing the position and the name of each track on the current ReadingQueue
+	 */
+	public HashMap<Integer, String> serialize() {
+		HashMap<Integer, String> serializedQueue = new HashMap<>();
+		Iterator it =  this.queue.iterator();
+		int trackPos = 0;
+		while (it.hasNext()) {
+			AudioFile audioFile = (AudioFile) it.next();
+			serializedQueue.put(trackPos, audioFile.getName());
+			trackPos++;
+		}
+		return serializedQueue;
+		
 	}
 
 }

@@ -108,7 +108,7 @@ public class GrooveberryServer extends JanusServer {
 				if (!audioFileList.isEmpty()) {
 					Locator.getService(ReadingQueueService.class, this).addToReadingQueue(audioFileList);
 				} else {
-					LOGGER.debug("No audio files in " + USER_HOME_PATH + "\\library\\");
+					LOGGER.debug("No audio files in " + USER_HOME_PATH + "\\.grooveberry\\library\\");
 				}
 			}
 		} catch (IOException e) {
