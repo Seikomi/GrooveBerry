@@ -10,7 +10,7 @@ public class Library {
 	private List<Song> songs;
 	private Map<User, List<Playlist>> playlistsByUsers;
 	
-	public static Library GetInstance() {
+	public static synchronized Library getInstance() {
 		if (instance == null) {
 			return new Library();
 		}

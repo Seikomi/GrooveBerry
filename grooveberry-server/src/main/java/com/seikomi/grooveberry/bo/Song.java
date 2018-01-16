@@ -15,7 +15,7 @@ public class Song {
 	}
 
 	public String getFileName() {
-		return path.substring(path.lastIndexOf('/')); //TODO handle all type of path (unix or windows)
+		return path.substring(path.lastIndexOf('\\') + 1); //TODO handle all type of path (unix or windows)
 	}
 	
 	public void setPath(String path) {

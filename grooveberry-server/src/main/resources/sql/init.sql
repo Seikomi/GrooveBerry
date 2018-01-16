@@ -26,7 +26,7 @@ CREATE TABLE Song (
   path      varchar(255), 
   fileName  int, 
   libraryId int, 
-  songTagId int NOT NULL, 
+  songTagId int, 
   PRIMARY KEY (songId)
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE SongTag (
   year        int, 
   comment     varchar(255), 
   trackNumber int, 
-  genreId     int NOT NULL, 
+  genreId     int, 
   PRIMARY KEY (songTagId)
 );
 

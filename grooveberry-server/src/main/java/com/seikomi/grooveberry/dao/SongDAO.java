@@ -43,7 +43,18 @@ public class SongDAO extends DAO<Song> {
 		Song songCreated = null;
 		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_CREATE_SONG)) {
 			preparedStatement.setString(1, song.getPath());
-			preparedStatement.setLong(2, song.getSongTag().getSongTagId());
+			if (song.getSongTag() != null) {
+				DAO<SongTag> songTagDAO = new SongTagDAO();
+				SongTag songTag = songTagDAO.find(song.getSongTag().getSongTagId());
+				if (songTag != null) {
+					preparedStatement.setLong(2, song.getSongTag().getSongTagId());
+				} else {
+					SongTag createdSongTag = songTagDAO.create(song.getSongTag());
+					preparedStatement.setLong(2, createdSongTag.getSongTagId());
+				}
+			} else {
+				preparedStatement.setNull(2, Types.INTEGER);
+			}
 			
 			LOGGER.trace("SQL : " + SQL_QUERY_CREATE_SONG);
 			preparedStatement.executeUpdate();
