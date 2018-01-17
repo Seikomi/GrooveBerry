@@ -26,7 +26,7 @@ public final class ReadingQueue {
 
 	private static ReadingQueue instance;
 	
-	private LinkedList<AudioFile> queue; //TODO Créer une interface et rendre serialisable 
+	private LinkedList<AudioFile> queue;
 	private	AudioFile currentTrack;
 	private int currentTrackIndex;
 	private boolean randomised;
@@ -229,7 +229,7 @@ public final class ReadingQueue {
 	 */
 	public HashMap<Integer, String> serialize() {
 		HashMap<Integer, String> serializedQueue = new HashMap<>();
-		Iterator it =  this.queue.iterator();
+		Iterator<AudioFile> it =  this.queue.iterator();
 		int trackPos = 0;
 		while (it.hasNext()) {
 			AudioFile audioFile = (AudioFile) it.next();

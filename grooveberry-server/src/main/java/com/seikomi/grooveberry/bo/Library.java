@@ -4,9 +4,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.seikomi.grooveberry.dao.SongDAO;
+
+/**
+ * This class represent the library of the songs played in the grooveberry server. 
+ * @author nsymphorien
+ *
+ */
 public class Library {
 
 	private static Library instance;
+	
 	private List<Song> songs;
 	private Map<User, List<Playlist>> playlistsByUsers;
 	
@@ -18,7 +26,7 @@ public class Library {
 	}
 
 	private Library() {
-		// Hide the public one
+		this.songs = new SongDAO().findAll();
 	}
 
 	public Song getSong(int index) {

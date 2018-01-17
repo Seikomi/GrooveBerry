@@ -11,10 +11,15 @@ import org.slf4j.LoggerFactory;
 import com.seikomi.grooveberry.bo.Genre;
 import com.seikomi.grooveberry.bo.SongTag;
 
+/**
+ * This class is the DAO of the {@link SongTag} object
+ * 
+ * @author Nicolas SYMPHORIEN (nicolas.symphorien@gmail.com)
+ */
 public class SongTagDAO extends DAO<SongTag> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SongTagDAO.class);
 
-	private static final String SQL_QUERY_FIND_SONG_TAG = "SELECT title, artistName, albumName, year, comment, trackNumber, genreId FROM SongTag";
+	private static final String SQL_QUERY_FIND_SONG_TAG = "SELECT title, artistName, albumName, year, comment, trackNumber, genreId FROM SongTag WHERE songTagId = ?";
 	private static final String SQL_QUERY_CREATE_SONG_TAG = "INSERT INTO SongTag(title, artistName, albumName, year, comment, trackNumber, genreId) VALUES (?, ?, ?, ?, ?, ?, ?)";
 	private static final String SQL_QUERY_UPDATE_SONG_TAG = "UPDATE SongTag SET title = ?, artistName = ?, albumName = ?, year = ?, comment = ?, trackNumber = ?, genreId = ? WHERE songTagId = ?";
 	private static final String SQL_QUERY_DELETE_SONG_TAG = "DELETE FROM SongTag WHERE songTagId = ?";
@@ -22,7 +27,10 @@ public class SongTagDAO extends DAO<SongTag> {
 	@Override
 	public SongTag find(long songTagId) {
 		SongTag songTag = null;
-		try (ResultSet result = connection.createStatement().executeQuery(SQL_QUERY_FIND_SONG_TAG)) {
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_FIND_SONG_TAG)) {
+			preparedStatement.setLong(1, songTagId);
+			
+			ResultSet result = preparedStatement.executeQuery();
 			LOGGER.trace("SQL : " + SQL_QUERY_FIND_SONG_TAG);
 			if (result.first()) {
 				songTag = new SongTag();
@@ -60,13 +68,12 @@ public class SongTagDAO extends DAO<SongTag> {
 				preparedStatement.setNull(7, Types.INTEGER);
 			}
 			
-			LOGGER.trace("SQL : " + SQL_QUERY_CREATE_SONG_TAG);
 			preparedStatement.executeUpdate();
-			ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-			if (generatedKeys.first()) {
-				long songTagId = generatedKeys.getLong(1);
-				songTagCreated = find(songTagId);
-			}
+			LOGGER.trace("SQL : " + SQL_QUERY_CREATE_SONG_TAG);
+			
+			long songTagCreatedId = findLastIdCreated(preparedStatement);
+			LOGGER.trace("SQL : get the last generated key");
+			songTagCreated = find(songTagCreatedId);
 		} catch (SQLException e) {
 			LOGGER.error("Unable to create the song tag object", e);
 		}
@@ -85,8 +92,8 @@ public class SongTagDAO extends DAO<SongTag> {
 			preparedStatement.setInt(7, songTag.getGenre().getIndex());
 			preparedStatement.setLong(8, songTag.getSongTagId());
 			
-			LOGGER.trace("SQL : " + SQL_QUERY_UPDATE_SONG_TAG);
 			preparedStatement.executeUpdate();
+			LOGGER.trace("SQL : " + SQL_QUERY_UPDATE_SONG_TAG);
 		} catch (SQLException e) {
 			LOGGER.error("Unable to update the song tag object with the id = " + songTag.getSongTagId() , e);
 		}
@@ -98,8 +105,8 @@ public class SongTagDAO extends DAO<SongTag> {
 		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_DELETE_SONG_TAG)) {
 			preparedStatement.setLong(1, songTag.getSongTagId());
 			
-			LOGGER.trace("SQL : " + SQL_QUERY_DELETE_SONG_TAG);
 			preparedStatement.executeUpdate();
+			LOGGER.trace("SQL : " + SQL_QUERY_DELETE_SONG_TAG);
 		} catch (SQLException e) {
 			LOGGER.error("Unable to update the song tag object with the id = " + songTag.getSongTagId() , e);
 		}

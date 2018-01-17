@@ -1,5 +1,11 @@
 package com.seikomi.grooveberry.bo;
 
+/**
+ * This class represent the tags of a song. It mostly based on ID3 metadata
+ * container.
+ * 
+ * @author Nicolas SYMPHORIEN (nicolas.symphorien@gmail.com)
+ */
 public class SongTag {
 	
 	private long songTagId;

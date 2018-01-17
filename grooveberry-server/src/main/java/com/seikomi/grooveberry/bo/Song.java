@@ -1,7 +1,12 @@
 package com.seikomi.grooveberry.bo;
 
+/**
+ * This class contains song informations : the file location of the song and is
+ * associated {@link SongTag}
+ * 
+ * @author Nicolas SYMPHORIEN (nicolas.symphorien@gmail.com)
+ */
 public class Song {
-
 	private long songId;
 	private String path;
 	private SongTag songTag;
@@ -15,9 +20,9 @@ public class Song {
 	}
 
 	public String getFileName() {
-		return path.substring(path.lastIndexOf('\\') + 1); //TODO handle all type of path (unix or windows)
+		return path.substring(path.lastIndexOf('\\') + 1); // TODO handle all type of path (unix or windows)
 	}
-	
+
 	public void setPath(String path) {
 		this.path = path;
 	}
@@ -33,7 +38,5 @@ public class Song {
 	public void setSongTag(SongTag songTag) {
 		this.songTag = songTag;
 	}
-	
-	
 
 }
