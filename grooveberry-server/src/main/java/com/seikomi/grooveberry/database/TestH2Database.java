@@ -15,13 +15,16 @@ import org.slf4j.LoggerFactory;
 import com.seikomi.grooveberry.GrooveberryServer;
 import com.seikomi.grooveberry.bo.AudioFile;
 import com.seikomi.grooveberry.bo.Library;
+import com.seikomi.grooveberry.bo.Playlist;
 import com.seikomi.grooveberry.bo.Song;
+import com.seikomi.grooveberry.dao.PlaylistDAO;
 import com.seikomi.grooveberry.dao.SongDAO;
 import com.seikomi.grooveberry.utils.AudioFileDirectoryScanner;
 
 public class TestH2Database {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestH2Database.class);
 	private static SongDAO songDAO = new SongDAO();
+	private static PlaylistDAO playlistDAO = new PlaylistDAO();
 	
 	public static void main(String[] args) throws SQLException {
 		Statement statement = ConnectionH2Database.getInstance().createStatement();
@@ -32,6 +35,14 @@ public class TestH2Database {
 		List<Song> songs = Library.getInstance().getSongs();
 		LOGGER.info("*** LIBRARY ***");
 		printSongsInfo(songs);
+		
+		Playlist playlist = new Playlist();
+		playlist.setName("My playlist = library");
+		playlist.setSongs(songs);
+		
+		Playlist playlistCreated = playlistDAO.create(playlist);
+		
+		printPlaylistInfo(playlistCreated);
 
 	}
 
@@ -63,6 +74,16 @@ public class TestH2Database {
 		for (Song song : songs) {
 			printSongInfo(song);
 		}		
+	}
+
+	private static void printPlaylistInfo(Playlist playlist) {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("        ID          " + playlist.getPlaylistId());
+		stringBuilder.append("\n        NAME        " + playlist.getName());
+		stringBuilder.append("\n        SONGS    ");
+		
+		LOGGER.info("Playlist object infos :\n" + stringBuilder);
+		printSongsInfo(playlist.getSongs());
 	}
 
 	private static void printSongInfo(Song song) {

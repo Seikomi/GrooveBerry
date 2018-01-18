@@ -3,6 +3,7 @@ package com.seikomi.grooveberry.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +23,12 @@ public class SongDAO extends DAO<Song> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SongDAO.class);
 
 	private static final String SQL_QUERY_FIND_SONG = "SELECT path, songTagId FROM Song WHERE songId = ?";
-	private static final String SQL_QUERY_FIND_All_SONGS = "SELECT * FROM Song";
+	private static final String SQL_QUERY_FIND_ALL_SONGS = "SELECT * FROM Song";
 	private static final String SQL_QUERY_CREATE_SONG = "INSERT INTO Song(path, songTagId) VALUES (?, ?)";
 	private static final String SQL_QUERY_UPDATE_SONG = "UPDATE Song SET path = ?, songTagId = ? WHERE songId = ?";
 	private static final String SQL_QUERY_DELETE_SONG = "DELETE FROM Song WHERE songId = ?";
+
+	private static final String SQL_QUERY_FIND_SONGS_BY_PLAYLIST_ID = "SELECT * FROM Song WHERE songId IN (SELECT songId FROM PlaylistSong WHERE playlistId = ?)";
 
 	private DAO<SongTag> songTagDAO;
 
@@ -38,55 +41,15 @@ public class SongDAO extends DAO<Song> {
 
 	@Override
 	public Song find(long songId) {
-		Song song = new Song();
-		
-		
+		Song song = null;
 		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_FIND_SONG)) {
 			preparedStatement.setLong(1, songId);
-			
-			ResultSet result = preparedStatement.executeQuery();
-			LOGGER.trace("SQL : " + SQL_QUERY_FIND_SONG);
-			if (result.first()) {
-				SongTag songTag = findAssociatedSongTag(result);
 
-				song.setSongId(songId);
-				song.setPath(result.getString("path"));
-				song.setSongTag(songTag);
-			} else {
-				LOGGER.trace("SQL : empty ResultSet");
-			}
+			song = executeFindQuery(songId, preparedStatement);
 		} catch (SQLException e) {
-			LOGGER.error("Unable to find the song object with the id = " + songId, e);
+			LOGGER.error("Unable to find the song object with the id = {}", songId, e);
 		}
 		return song;
-	}
-
-	/**
-	 * Finds all songs in database.
-	 * 
-	 * @return the list of all songs
-	 */
-	public List<Song> findAll() {
-		List<Song> songs = new ArrayList<>();
-		try (ResultSet result = connection.createStatement().executeQuery(SQL_QUERY_FIND_All_SONGS)) {
-			LOGGER.trace("SQL : " + SQL_QUERY_FIND_All_SONGS);
-			while (result.next()) {
-				SongTag songTag = findAssociatedSongTag(result);
-
-				Song song = new Song();
-				song.setSongId(result.getLong("songId"));
-				song.setPath(result.getString("path"));
-				song.setSongTag(songTag);
-
-				songs.add(song);
-			}
-			if (songs.isEmpty()) {
-				LOGGER.trace("SQL : empty ResultSet");
-			}
-		} catch (SQLException e) {
-			LOGGER.error("Unable to find the songs objects", e);
-		}
-		return songs;
 	}
 
 	@Override
@@ -108,10 +71,10 @@ public class SongDAO extends DAO<Song> {
 			}
 
 			preparedStatement.executeUpdate();
-			LOGGER.trace("SQL : " + SQL_QUERY_CREATE_SONG);
+			LOGGER.trace(SQL_TRACE_FORMAT, preparedStatement);
 
 			long songCreatedId = findLastIdCreated(preparedStatement);
-			LOGGER.trace("SQL : get the last generated key");
+			LOGGER.trace(SQL_TRACE_FORMAT, "get the last generated key");
 			songCreated = find(songCreatedId);
 		} catch (SQLException e) {
 			LOGGER.error("Unable to create the song object", e);
@@ -131,9 +94,9 @@ public class SongDAO extends DAO<Song> {
 			preparedStatement.setLong(3, song.getSongId());
 
 			preparedStatement.executeUpdate();
-			LOGGER.trace("SQL : " + SQL_QUERY_UPDATE_SONG);
+			LOGGER.trace(SQL_TRACE_FORMAT, preparedStatement);
 		} catch (SQLException e) {
-			LOGGER.error("Unable to update the song object with the id = " + song.getSongId(), e);
+			LOGGER.error("Unable to update the song object with the id = {}", song.getSongId(), e);
 		}
 		return find(song.getSongId());
 	}
@@ -147,10 +110,125 @@ public class SongDAO extends DAO<Song> {
 			preparedStatement.setLong(1, song.getSongId());
 
 			preparedStatement.executeUpdate();
-			LOGGER.trace("SQL : " + SQL_QUERY_DELETE_SONG);
+			LOGGER.trace(SQL_TRACE_FORMAT, preparedStatement);
 		} catch (SQLException e) {
-			LOGGER.error("Unable to update the song object with the id = " + song.getSongId(), e);
+			LOGGER.error("Unable to update the song object with the id = {}", song.getSongId(), e);
 		}
+	}
+
+	/**
+	 * Finds all songs in database.
+	 * 
+	 * @return the list of all songs
+	 */
+	public List<Song> findAll() {
+		List<Song> songs = new ArrayList<>();
+		try (Statement statement = connection.createStatement();
+				ResultSet result = statement.executeQuery(SQL_QUERY_FIND_ALL_SONGS)) {
+			LOGGER.trace(SQL_TRACE_FORMAT, statement);
+			songs = createSongList(result);
+		} catch (SQLException e) {
+			LOGGER.error("Unable to find the songs objects", e);
+		}
+		return songs;
+	}
+
+	/**
+	 * Finds all the songs associated with the playlist id in the database.
+	 * 
+	 * @param playlistId
+	 *            the playlist id
+	 * @return the list of the songs in the playlist
+	 */
+	public List<Song> findByPlaylistId(long playlistId) {
+		List<Song> songs = new ArrayList<>();
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_FIND_SONGS_BY_PLAYLIST_ID)) {
+			preparedStatement.setLong(1, playlistId);
+			songs = executeFindByPlaylistIdQuery(preparedStatement);
+		} catch (SQLException e) {
+			LOGGER.error("Unable to find the songs objects for the playlist id = {}", playlistId, e);
+		}
+		return songs;
+	}
+
+	/**
+	 * Executes a find query on the song with his id and create the associated song
+	 * object.
+	 * 
+	 * @param songId
+	 *            the song id
+	 * @param preparedStatement
+	 *            the prepared statement to execute
+	 * @return the song found
+	 * @throws SQLException
+	 *             if a database access error occurs; this method is called on a
+	 *             closed PreparedStatement or the SQL statement does not return a
+	 *             ResultSet object
+	 */
+	private Song executeFindQuery(long songId, PreparedStatement preparedStatement) throws SQLException {
+		Song song = null;
+		try (ResultSet result = preparedStatement.executeQuery()) {
+			LOGGER.trace(SQL_TRACE_FORMAT, preparedStatement);
+			if (result.first()) {
+				SongTag songTag = findAssociatedSongTag(result);
+
+				song = new Song();
+				song.setSongId(songId);
+				song.setPath(result.getString("path"));
+				song.setSongTag(songTag);
+			} else {
+				LOGGER.trace(SQL_TRACE_FORMAT, "empty ResultSet");
+			}
+		}
+		return song;
+	}
+
+	/**
+	 * Executes a find query on the songs to find these associated with a playlist.
+	 * 
+	 * @param preparedStatement
+	 *            the prepared statement to execute
+	 * @return the list of the songs in the playlist
+	 * @throws SQLException
+	 *             if a database access error occurs; this method is called on a
+	 *             closed PreparedStatement or the SQL statement does not return a
+	 *             ResultSet object
+	 */
+	private List<Song> executeFindByPlaylistIdQuery(PreparedStatement preparedStatement) throws SQLException {
+		List<Song> songs = new ArrayList<>();
+		try (ResultSet result = preparedStatement.executeQuery()) {
+			LOGGER.trace(SQL_TRACE_FORMAT, preparedStatement);
+			songs = createSongList(result);
+		}
+		return songs;
+	}
+
+	/**
+	 * Create the songs list according to the result of a query.
+	 * 
+	 * @param result
+	 *            the result of a query
+	 * @return the songs list
+	 * @throws SQLException
+	 *             if the song tag id label is not valid; if a database access error
+	 *             occurs or this method is called on a closed result set
+	 */
+	private List<Song> createSongList(ResultSet result) throws SQLException {
+		List<Song> songs = new ArrayList<>();
+		while (result.next()) {
+			SongTag songTag = findAssociatedSongTag(result);
+
+			Song song = new Song();
+			song.setSongId(result.getLong("songId"));
+			song.setPath(result.getString("path"));
+			song.setSongTag(songTag);
+
+			songs.add(song);
+		}
+		if (songs.isEmpty()) {
+			LOGGER.trace(SQL_TRACE_FORMAT, "empty ResultSet");
+		}
+		return songs;
 	}
 
 	/**
