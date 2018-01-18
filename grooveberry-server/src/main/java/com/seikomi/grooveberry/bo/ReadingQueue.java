@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * La classe <code>ReadingQueue</code> permet la gestion d'un fil de lecture
@@ -227,12 +228,12 @@ public final class ReadingQueue {
 	 * @return
 	 * 		the map containing the position and the name of each track on the current ReadingQueue
 	 */
-	public HashMap<Integer, String> serialize() {
+	public Map<Integer, String> serialize() {
 		HashMap<Integer, String> serializedQueue = new HashMap<>();
 		Iterator<AudioFile> it =  this.queue.iterator();
 		int trackPos = 0;
 		while (it.hasNext()) {
-			AudioFile audioFile = (AudioFile) it.next();
+			AudioFile audioFile = it.next();
 			serializedQueue.put(trackPos, audioFile.getName());
 			trackPos++;
 		}
