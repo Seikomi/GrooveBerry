@@ -17,8 +17,10 @@ import com.seikomi.grooveberry.database.ConnectionH2Database;
  * @author Nicolas SYMPHORIEN (nicolas.symphorien@gmail.com)
  */
 public abstract class DAO<T> {
+	protected static final String SQL_TRACE_FORMAT = "SQL: {}";
+	
 	/** The H2 database connector. */
-	public Connection connection = ConnectionH2Database.getInstance();
+	protected static Connection connection = ConnectionH2Database.getInstance();
 
 	/**
 	 * Finds the object {@code T} in the database with his id.
@@ -64,15 +66,16 @@ public abstract class DAO<T> {
 	 * 
 	 * @param preparedStatement
 	 *            the prepare statement
-	 * @return the last key id created by the prepared statement
+	 * @return the last key id created by the prepared statement or {@code 0} if there is none 
 	 * @throws SQLException
 	 *             if a database access error occurs or this method is called on a
 	 *             closed result set
 	 */
-	protected long findLastIdCreated(PreparedStatement preparedStatement) throws SQLException {
-		ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-		if (generatedKeys.first()) {
-			return generatedKeys.getLong(1);
+	protected static long findLastIdCreated(PreparedStatement preparedStatement) throws SQLException {
+		try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
+			if (generatedKeys.first()) {
+				return generatedKeys.getLong(1);
+			}
 		}
 		return 0;
 	}
