@@ -55,7 +55,7 @@ public class TestH2Database {
 				AudioFileDirectoryScanner directoryScanner = new AudioFileDirectoryScanner(directoryPath);
 
 				LOGGER.debug("Loading audio files in database");
-				ArrayList<AudioFile> audioFileList = directoryScanner.getAudioFileList();
+				List<AudioFile> audioFileList = directoryScanner.getAudioFileList();
 				if (audioFileList.isEmpty()) {
 					LOGGER.debug("No audio files in " + GrooveberryServer.USER_HOME_PATH + "\\.grooveberry\\library\\");
 				}
