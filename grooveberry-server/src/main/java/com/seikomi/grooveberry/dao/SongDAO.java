@@ -125,7 +125,7 @@ public class SongDAO extends DAO<Song> {
 		List<Song> songs = new ArrayList<>();
 		try (Statement statement = connection.createStatement();
 				ResultSet result = statement.executeQuery(SQL_QUERY_FIND_ALL_SONGS)) {
-			LOGGER.trace(SQL_TRACE_FORMAT, statement);
+			LOGGER.trace(SQL_TRACE_FORMAT, SQL_QUERY_FIND_ALL_SONGS);
 			songs = createSongList(result);
 		} catch (SQLException e) {
 			LOGGER.error("Unable to find the songs objects", e);
@@ -170,12 +170,14 @@ public class SongDAO extends DAO<Song> {
 		try (ResultSet result = preparedStatement.executeQuery()) {
 			LOGGER.trace(SQL_TRACE_FORMAT, preparedStatement);
 			if (result.first()) {
-				SongTag songTag = findAssociatedSongTag(result);
-
 				song = new Song();
 				song.setSongId(songId);
 				song.setPath(result.getString("path"));
-				song.setSongTag(songTag);
+				
+				SongTag songTag = findAssociatedSongTag(result);
+				if (songTag !=null) {
+					song.setSongTag(songTag);
+				}				
 			} else {
 				LOGGER.trace(SQL_TRACE_FORMAT, "empty ResultSet");
 			}
@@ -216,12 +218,14 @@ public class SongDAO extends DAO<Song> {
 	private List<Song> createSongList(ResultSet result) throws SQLException {
 		List<Song> songs = new ArrayList<>();
 		while (result.next()) {
-			SongTag songTag = findAssociatedSongTag(result);
-
 			Song song = new Song();
 			song.setSongId(result.getLong("songId"));
 			song.setPath(result.getString("path"));
-			song.setSongTag(songTag);
+			
+			SongTag songTag = findAssociatedSongTag(result);
+			if (songTag != null) {
+				song.setSongTag(songTag);
+			}
 
 			songs.add(song);
 		}
@@ -242,6 +246,9 @@ public class SongDAO extends DAO<Song> {
 	 *             occurs or this method is called on a closed result set
 	 */
 	private SongTag findAssociatedSongTag(ResultSet result) throws SQLException {
+		if (result.getInt("songTagId") == 0) {
+			return null;
+		}
 		return songTagDAO.find(result.getInt("songTagId"));
 	}
 

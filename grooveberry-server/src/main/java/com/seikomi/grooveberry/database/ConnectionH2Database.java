@@ -12,7 +12,7 @@ public class ConnectionH2Database {
 
 	private static Connection instance;
 
-	public ConnectionH2Database() {
+	private ConnectionH2Database() {
 		// Hide the public constructor
 	}
 

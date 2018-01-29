@@ -27,7 +27,7 @@ public final class ReadingQueue {
 
 	private static ReadingQueue instance;
 	
-	private LinkedList<AudioFile> queue;
+	private LinkedList<Song> queue;
 	private	AudioFile currentTrack;
 	private int currentTrackIndex;
 	private boolean randomised;
@@ -79,9 +79,9 @@ public final class ReadingQueue {
 	 * @param
 	 * 		track le morceau à ajouter
 	 */
-	public void addLast(AudioFile track){
+	public void addLast(Song track){
 		if (this.isEmpty()) {
-			this.currentTrack = track;
+			this.currentTrack = new AudioFile(track.getPath());
 			this.currentTrackIndex = 0;
 		}
 		this.queue.add(track);
@@ -96,9 +96,9 @@ public final class ReadingQueue {
 	 * @param track
 	 * 		le morceau à ajouter
 	 */
-	public void addAt(int index, AudioFile track) {
+	public void addAt(int index, Song track) {
 		if (this.isEmpty()) {
-			this.currentTrack = track;
+			this.currentTrack = new AudioFile(track.getPath());
 			this.currentTrackIndex = 0;
 		}
 		if (index <= this.currentTrackIndex && !this.isEmpty()) {
@@ -113,9 +113,9 @@ public final class ReadingQueue {
 	 * @param playlist
 	 * 		la playlist à ajouter
 	 */
-	public void addList(List<AudioFile> playlist) {
+	public void addList(List<Song> playlist) {
 		if (this.isEmpty()) {
-			this.currentTrack = playlist.get(0);
+			this.currentTrack = new AudioFile(playlist.get(0).getPath());
 			this.currentTrackIndex = 0;
 		}
 		this.queue.addAll(playlist);
@@ -130,7 +130,7 @@ public final class ReadingQueue {
 	 * @param playlist
 	 * 		la playlist à ajouter
 	 */
-	public void addListAt(int index, List<AudioFile> playlist) {
+	public void addListAt(int index, List<Song> playlist) {
 		this.queue.addAll(index, playlist);
 	}
 
@@ -142,11 +142,11 @@ public final class ReadingQueue {
 	 * 		la position où supprimer le morceau
 	 */
 	public void remove(int index) {
-		AudioFile removeFile = this.queue.get(index);
-		if (removeFile == this.currentTrack) {
+		Song removeFile = this.queue.get(index);
+		if (removeFile.getPath().equals(this.currentTrack.getAbsolutePath())) {
 			this.currentTrack.deleteObservers();
-			if (this.queue.getLast() != this.currentTrack) {				
-				this.currentTrack = this.queue.get(currentTrackIndex + 1);
+			if (!this.queue.getLast().getPath().equals(this.currentTrack.getAbsolutePath())) {				
+				this.currentTrack = new AudioFile(this.queue.get(currentTrackIndex + 1).getPath());
 			} else {
 				this.currentTrack = null;
 				this.currentTrackIndex = -1;
@@ -198,7 +198,7 @@ public final class ReadingQueue {
      * @see LikedList
      * @see Audiofile
 	 */ 
-	public List<AudioFile> getAudioFileList() {
+	public List<Song> getAudioFileList() {
 		return Collections.unmodifiableList(this.queue);
 	}
 
@@ -220,7 +220,7 @@ public final class ReadingQueue {
 	 */
 	public void setCurrentTrackPostion(int index) {
 		this.currentTrackIndex = index;
-		this.currentTrack = this.queue.get(index);
+		this.currentTrack = new AudioFile(this.queue.get(index).getPath());
 	}
 	
 	/**
@@ -230,11 +230,11 @@ public final class ReadingQueue {
 	 */
 	public Map<Integer, String> serialize() {
 		HashMap<Integer, String> serializedQueue = new HashMap<>();
-		Iterator<AudioFile> it =  this.queue.iterator();
+		Iterator<Song> it =  this.queue.iterator();
 		int trackPos = 0;
 		while (it.hasNext()) {
-			AudioFile audioFile = it.next();
-			serializedQueue.put(trackPos, audioFile.getName());
+			Song audioFile = it.next();
+			serializedQueue.put(trackPos, audioFile.getFileName());
 			trackPos++;
 		}
 		return serializedQueue;

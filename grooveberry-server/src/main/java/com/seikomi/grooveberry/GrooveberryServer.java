@@ -11,7 +11,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.seikomi.grooveberry.bo.AudioFile;
 import com.seikomi.grooveberry.bo.Song;
 import com.seikomi.grooveberry.commands.Next;
 import com.seikomi.grooveberry.commands.Pause;
@@ -41,6 +40,20 @@ public class GrooveberryServer extends JanusServer {
 
 		super.start();
 	}
+	
+	
+
+	@Override
+	public void stop() {
+		try {
+			ConnectionH2Database.getInstance().close();
+		} catch (SQLException e) {
+			LOGGER.error("Database closing failed", e);
+		}
+		super.stop();
+	}
+
+
 
 	@Override
 	protected void loadContext() {
@@ -93,7 +106,9 @@ public class GrooveberryServer extends JanusServer {
 	
 	private void initDatabase() {
 		try (Statement statement = ConnectionH2Database.getInstance().createStatement()){
-			statement.executeUpdate("RUNSCRIPT FROM '" + new File("D:\\Perso\\workspace\\GrooveBerry\\grooveberry-server\\src\\main\\resources\\sql\\init.sql") + "'");
+			ClassLoader classLoader = getClass().getClassLoader();
+			File initDatabaseFile = new File(classLoader.getResource("sql/init.sql").getFile());
+			statement.executeUpdate(String.format("RUNSCRIPT FROM '%s'", initDatabaseFile));
 		} catch (SQLException e) {
 			LOGGER.error("Unable to build the database", e);
 		}
@@ -107,18 +122,19 @@ public class GrooveberryServer extends JanusServer {
 			Path directoryPath = Paths.get(USER_HOME_PATH + "/.grooveberry/library/");
 
 			if (directoryPath.toFile().exists()) {
+				SongDAO songDAO = new SongDAO();
+				
 				LOGGER.debug("Scanning audio files in directory : {}", directoryPath.toAbsolutePath());
 				AudioFileDirectoryScanner directoryScanner = new AudioFileDirectoryScanner(directoryPath);
 				
 				LOGGER.debug("Populate the database");
 				for (Song song : directoryScanner.getSongList()) {
-					SongDAO songDAO = new SongDAO();
 					songDAO.create(song);
 					LOGGER.debug("Loading song : {} in the database", song.getFileName());
 				}
 
 				LOGGER.debug("Loading audio files in reading queue");
-				List<AudioFile> audioFileList = directoryScanner.getAudioFileList();
+				List<Song> audioFileList = songDAO.findAll();
 				if (!audioFileList.isEmpty()) {
 					Locator.getService(ReadingQueueService.class, this).addToReadingQueue(audioFileList);
 				} else {
