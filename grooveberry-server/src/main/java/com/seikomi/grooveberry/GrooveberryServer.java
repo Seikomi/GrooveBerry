@@ -26,11 +26,16 @@ import com.seikomi.grooveberry.services.ReadingQueueService;
 import com.seikomi.grooveberry.utils.AudioFileDirectoryScanner;
 import com.seikomi.janus.commands.CommandsFactory;
 import com.seikomi.janus.net.JanusServer;
+import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.services.Locator;
 
 public class GrooveberryServer extends JanusServer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GrooveberryServer.class);
 	public static final String USER_HOME_PATH = System.getProperty("user.home");
+	
+	public GrooveberryServer(JanusProperties janusProperties) {
+		super(janusProperties);
+	}
 
 	@Override
 	public void start() {
@@ -39,9 +44,7 @@ public class GrooveberryServer extends JanusServer {
 		initReadingQueue();
 
 		super.start();
-	}
-	
-	
+	}	
 
 	@Override
 	public void stop() {
@@ -52,8 +55,6 @@ public class GrooveberryServer extends JanusServer {
 		}
 		super.stop();
 	}
-
-
 
 	@Override
 	protected void loadContext() {
