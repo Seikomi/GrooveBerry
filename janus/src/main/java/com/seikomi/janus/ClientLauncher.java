@@ -32,6 +32,12 @@ public class ClientLauncher implements Observer {
 			LOGGER.info("Janus client started and connecting to the port " + client.getCommandPort() + " for commands");
 
 			scanner = new Scanner(System.in);
+			
+			String command;
+			do {
+				command = scanner.nextLine();
+				client.executeCommand(command);
+			} while(!"#EXIT".equals(command));
 
 		} catch (IOException e) {
 			LOGGER.error("An unknown error occurs during the reading of Janus client properties file", e);
