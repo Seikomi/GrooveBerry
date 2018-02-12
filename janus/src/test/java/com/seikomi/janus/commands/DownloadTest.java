@@ -17,7 +17,6 @@ import com.seikomi.janus.net.properties.JanusServerProperties;
 public class DownloadTest {
 
 	private JanusServer server;
-	private JanusServerProperties serverProperties;
 	
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -25,8 +24,8 @@ public class DownloadTest {
 	@Before
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
-		JanusServerProperties.loadProperties(serverPropertiesPath);
-		server = new JanusServer() {
+		JanusServerProperties serverProperties = new JanusServerProperties(serverPropertiesPath);
+		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {
 				//Nothing to do
@@ -39,7 +38,6 @@ public class DownloadTest {
 	public void tearDown() throws Exception {
 		CommandsFactory.clear();
 		server = null;
-		serverProperties = null;
 	}
 
 	@Test

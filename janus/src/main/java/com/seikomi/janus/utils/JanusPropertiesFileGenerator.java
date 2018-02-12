@@ -27,32 +27,32 @@ public final class JanusPropertiesFileGenerator {
 	}
 
 	/**
-	 * Create a new {@code server.propertie} file with command and data port
-	 * pick in available ports.
+	 * Create a new {@code server.propertie} file with command and data port pick in
+	 * available ports.
 	 * 
 	 * @param serverPropertiesFilePath
 	 * @throws IOException
 	 */
 	public static JanusServerProperties createServerPropertiesFile(Path serverPropertiesFilePath) throws IOException {
 		pickFreePort();
-		
-		JanusServerProperties.loadProperties(serverPropertiesFilePath);
 
-		useActualPickedPort(JanusServerProperties.readProperties().getProperties());
+		JanusServerProperties serverProperties = new JanusServerProperties(serverPropertiesFilePath);
 
-		return JanusServerProperties.readProperties();
+		useActualPickedPort(serverProperties.getProperties());
+
+		return serverProperties;
 	}
 
 	/**
-	 * Create a new {@code client.propertie} file with command and data port
-	 * pick in available ports.
+	 * Create a new {@code client.propertie} file with command and data port pick in
+	 * available ports.
 	 * 
 	 * @param clientPropertiesFilePath
 	 * @throws IOException
 	 */
 	public static JanusClientProperties createClientPropertiesFile(Path clientPropertiesFilePath) throws IOException {
 		pickFreePort();
-		
+
 		JanusClientProperties janusClientPropertiesFile = new JanusClientProperties(clientPropertiesFilePath);
 
 		useActualPickedPort(janusClientPropertiesFile.getProperties());
@@ -60,23 +60,24 @@ public final class JanusPropertiesFileGenerator {
 		return janusClientPropertiesFile;
 	}
 
-	public static JanusProperties[] createJanusProperties(Path serverPropertiesFilePath, Path clientPropertiesFilePath) throws IOException {
+	public static JanusProperties[] createJanusProperties(Path serverPropertiesFilePath, Path clientPropertiesFilePath)
+			throws IOException {
 		pickFreePort();
-		
-		JanusServerProperties.loadProperties(serverPropertiesFilePath);
-		useActualPickedPort(JanusServerProperties.readProperties().getProperties());
+
+		JanusServerProperties janusServerPropertiesFile = new JanusServerProperties(serverPropertiesFilePath);
+		useActualPickedPort(janusServerPropertiesFile.getProperties());
 
 		JanusClientProperties janusClientPropertiesFile = new JanusClientProperties(clientPropertiesFilePath);
 		useActualPickedPort(janusClientPropertiesFile.getProperties());
-		
-		return new JanusProperties[] { JanusServerProperties.readProperties(), janusClientPropertiesFile };
+
+		return new JanusProperties[] { janusServerPropertiesFile, janusClientPropertiesFile };
 	}
-	
-	private static void useActualPickedPort(Properties propertiesFile) throws IOException {
+
+	private static void useActualPickedPort(Properties propertiesFile) {
 		propertiesFile.setProperty(JanusDefaultProperties.COMMAND_PORT.getPropertyName(), commandPort);
 		propertiesFile.setProperty(JanusDefaultProperties.DATA_PORT.getPropertyName(), dataPort);
 	}
-	
+
 	private static void pickFreePort() throws IOException {
 		commandPort = findFreePort();
 		dataPort = findFreePort();

@@ -14,7 +14,6 @@ import java.util.Deque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.seikomi.janus.net.properties.JanusServerProperties;
 import com.seikomi.janus.utils.Utils;
 import com.seikomi.janus.utils.Utils.Pair;
 
@@ -38,6 +37,9 @@ public class DataTransferTask extends JanusTask {
 
 	private BufferedOutputStream out;
 	private BufferedInputStream in;
+	
+	private String receptionDirectory;
+	private int dataPort;
 
 	private Deque<Pair<String, Boolean>> filesDeque;
 
@@ -54,8 +56,9 @@ public class DataTransferTask extends JanusTask {
 	 *            flag to indicate the direction of the data transfer :
 	 *            {@code true} for sending and {@code false} to receiving.
 	 */
-	public DataTransferTask(String[] fileNames, boolean isDownloadTransfert) {
-
+	public DataTransferTask(String[] fileNames, String receptionDirectory, int dataPort, boolean isDownloadTransfert) {
+		this.receptionDirectory = receptionDirectory;
+		this.dataPort = dataPort;
 		this.filesDeque = new ArrayDeque<>();
 
 		if (fileNames == null || fileNames.length == 0) {
@@ -73,7 +76,7 @@ public class DataTransferTask extends JanusTask {
 	@Override
 	protected void beforeLoop() {
 		try {
-			dataServerSocket = new ServerSocket(JanusServerProperties.readProperties().getDataPort());
+			dataServerSocket = new ServerSocket(dataPort);
 			Socket dataSocket = dataServerSocket.accept();
 			out = new BufferedOutputStream(dataSocket.getOutputStream(), BUFFER_SIZE);
 			in = new BufferedInputStream(dataSocket.getInputStream(), BUFFER_SIZE);
@@ -88,7 +91,7 @@ public class DataTransferTask extends JanusTask {
 	 * @throws IOException 
 	 */
 	@Override
-	protected void loop() throws IOException {
+	protected void loop() {
 		if (!filesDeque.isEmpty()) {
 			Pair<String, Boolean> file = filesDeque.pop();
 			if (file.getRight()) {
@@ -99,7 +102,11 @@ public class DataTransferTask extends JanusTask {
 					LOGGER.debug(file.getLeft() + " not found");
 				}
 			} else {
-				receiveFile(file.getLeft());
+				try {
+					receiveFile(file.getLeft());
+				} catch (IOException e) {
+					LOGGER.debug(file.getLeft() + " not found");
+				}
 			}
 		} else {
 			endLoop();
@@ -160,9 +167,8 @@ public class DataTransferTask extends JanusTask {
 	 *            the file path
 	 * @throws IOException 
 	 */
-	private void receiveFile(String path) throws IOException {
-		String directory = JanusServerProperties.readProperties().getProperties().getProperty("serverFileRootDirectory");
-		File file = new File(directory + path);
+	private void receiveFile(String path) throws IOException {;
+		File file = new File(receptionDirectory + "\\" + path);
 
 		try (final BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(file),
 				BUFFER_SIZE)) {
