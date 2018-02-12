@@ -99,6 +99,11 @@ public class JanusProperties {
 		for (JanusDefaultProperties defaultProperty : JanusDefaultProperties.values()) {
 			String propertyName = defaultProperty.getPropertyName();
 			String property = properties.getProperty(propertyName);
+			
+			if (property == null) {
+				valid &= false;
+				break;
+			}
 
 			boolean containsKeys = properties.containsKey(propertyName);
 			boolean isInteger = Utils.isInteger(property);
@@ -145,6 +150,10 @@ public class JanusProperties {
 	 */
 	public Properties getProperties() {
 		return properties;
+	}
+
+	public String getReceptionDirectory() {
+		return properties.getProperty(JanusDefaultProperties.RECEPTION_DIRECTORY.getPropertyName());
 	}
 
 }

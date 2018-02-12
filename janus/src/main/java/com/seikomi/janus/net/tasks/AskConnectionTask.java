@@ -8,8 +8,6 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.seikomi.janus.net.properties.JanusServerProperties;
-
 /**
  * Asking for connection task. Try to connect to a distant server to send and
  * receive commands.
@@ -24,35 +22,34 @@ public class AskConnectionTask extends JanusTask {
 	private DataInputStream in;
 	private DataOutputStream out;
 
+	private int commandPort;
+
+	public AskConnectionTask(int commandPort) {
+		this.commandPort = commandPort;
+	}
 
 	/**
-	 * Established the connection with a janus server and open an input stream
-	 * to send commands.
+	 * Established the connection with a janus server and open an input stream to
+	 * send commands.
 	 */
 	@Override
 	public void beforeLoop() {
 		try {
-			commandSocket = new Socket("localhost", JanusServerProperties.readProperties().getCommandPort());
+			commandSocket = new Socket("localhost", commandPort);
 			in = new DataInputStream(commandSocket.getInputStream());
 			out = new DataOutputStream(commandSocket.getOutputStream());
-
-			String message = in.readUTF();
-			LOGGER.info(message);
-
 		} catch (IOException e) {
 			LOGGER.error("An error occurs during connection establishment", e);
 		}
 	}
 
 	/**
-	 * Read the commands write on standart input and send it to the server.
-	 * Then, display the result.
+	 * Read the commands write on standard input and send it to the server. Then,
+	 * display the result.
 	 */
 	@Override
 	public void loop() {
 		try {
-			informObservers();
-
 			String message = in.readUTF();
 			LOGGER.info(message);
 
@@ -87,8 +84,8 @@ public class AskConnectionTask extends JanusTask {
 	}
 
 	/**
-	 * Gets the output stream used by the command socket. To provide a direct
-	 * access to the server.
+	 * Gets the output stream used by the command socket. To provide a direct access
+	 * to the server.
 	 * 
 	 * @return the output stream
 	 */

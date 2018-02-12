@@ -2,8 +2,6 @@ package com.seikomi.janus.net.tasks;
 
 import java.util.Observable;
 
-import com.seikomi.janus.net.NetworkApp;
-
 /**
  * Abstract class of Janus task, witch is a thread that run the three following
  * abstract methods :
@@ -20,7 +18,6 @@ import com.seikomi.janus.net.NetworkApp;
  */
 public abstract class JanusTask extends Observable implements Runnable {
 
-	private NetworkApp networkApp;
 	private volatile Thread currentThread;
 
 	@Override
@@ -29,14 +26,7 @@ public abstract class JanusTask extends Observable implements Runnable {
 
 		beforeLoop();
 		while (!currentThread.isInterrupted()) {
-			//Event ev = getCurrentEvent()
-			// ev.getType()
-			try {
-				loop();
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			loop();
 		}
 		afterLoop();
 	}
@@ -57,17 +47,19 @@ public abstract class JanusTask extends Observable implements Runnable {
 	 * method can be an infinite loop if no blocking method is used inside.
 	 * @throws Exception 
 	 */
-	protected abstract void loop() throws Exception;
+	protected abstract void loop();
 
 	/** End the {@code loop()} method in interrupting the current thread. */
 	protected void endLoop() {
-		currentThread.interrupt();
+		if (currentThread != null) {
+			currentThread.interrupt();
+		}
 	}
 
 	/** Inform the observer of the changes of state in Janus task. */
-	protected void informObservers() {
+	protected void informObservers(Object arg) {
 		setChanged();
-		notifyObservers();
+		notifyObservers(arg);
 	}
 
 }

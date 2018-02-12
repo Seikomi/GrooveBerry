@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import com.seikomi.janus.net.JanusClient;
 import com.seikomi.janus.net.properties.JanusClientProperties;
-import com.seikomi.janus.net.properties.JanusServerProperties;
 
 /**
  * Main class of Janus client.
@@ -21,18 +20,16 @@ import com.seikomi.janus.net.properties.JanusServerProperties;
  */
 public class ClientLauncher implements Observer {
 	static final Logger LOGGER = LoggerFactory.getLogger(ClientLauncher.class);
-	private static JanusClient client;
+	private JanusClient client;
 	private Scanner scanner;
 
-	private ClientLauncher() throws InterruptedException {
+	private ClientLauncher() {
 		Path propertiesFilePah = Paths.get("client.properties");
 		try {
 			JanusClientProperties clientProperties = new JanusClientProperties(propertiesFilePah);
-			JanusServerProperties.loadProperties(Paths.get("client.properties"));
 			client = new JanusClient(clientProperties);
 			client.start();
 			LOGGER.info("Janus client started and connecting to the port " + client.getCommandPort() + " for commands");
-			client.addObserver(this); //FIXME synchronization !!!
 
 			scanner = new Scanner(System.in);
 
@@ -54,7 +51,7 @@ public class ClientLauncher implements Observer {
 	 *            the arguments : not require
 	 * @throws InterruptedException
 	 */
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
 		new ClientLauncher();
 	}
 

@@ -25,8 +25,8 @@ public class LocatorTest {
 	@Before
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
-		JanusServerProperties.loadProperties(serverPropertiesPath);
-		server = new JanusServer() {
+		JanusServerProperties serverProperties = new JanusServerProperties(serverPropertiesPath);
+		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {
 				//Nothing to do

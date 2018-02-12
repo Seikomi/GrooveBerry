@@ -8,15 +8,12 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 /** TODO reactivate **/
-@Ignore
 public class JanusServerPropertiesTest {
 
 	private final static URL PROPERTIES_URL = TestUtils.getServerPropertiesURL();
@@ -25,8 +22,6 @@ public class JanusServerPropertiesTest {
 
 	private static final int DATA_PORT_EXPECTED = JanusDefaultProperties.DATA_PORT.getPropertyValueAsInt();
 	private static final int COMMAND_PORT_EXPECTED = JanusDefaultProperties.COMMAND_PORT.getPropertyValueAsInt();
-
-	private JanusServerProperties serverProperties;
 
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -37,16 +32,10 @@ public class JanusServerPropertiesTest {
 		// serverProperties
 	}
 
-	@After
-	public void tearDown() throws Exception {
-		serverProperties = null;
-	}
-
 	@Test
 	public void testJanusServerPropertiesWithNoExistingPropertiesFile() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "testCreateProperties.properties");
-		JanusServerProperties.loadProperties(serverPropertiesPath);
-
+		JanusServerProperties serverProperties = new JanusServerProperties(serverPropertiesPath);
 
 		assertEquals(COMMAND_PORT_EXPECTED, serverProperties.getCommandPort());
 		assertEquals(DATA_PORT_EXPECTED, serverProperties.getDataPort());
@@ -58,7 +47,7 @@ public class JanusServerPropertiesTest {
 	@Test
 	public void testJanusServerPropertiesWithExistingPropertiesFile() throws Exception {
 		Path serverPropertiesPath = Paths.get(PROPERTIES_URL.toURI());
-		JanusServerProperties.loadProperties(serverPropertiesPath);
+		JanusServerProperties serverProperties = new JanusServerProperties(serverPropertiesPath);
 
 		assertEquals(COMMAND_PORT_EXPECTED, serverProperties.getCommandPort());
 		assertEquals(DATA_PORT_EXPECTED, serverProperties.getDataPort());
@@ -68,7 +57,7 @@ public class JanusServerPropertiesTest {
 	@Test(expected = IOException.class)
 	public void testMalFormedJanusServerPropertiesWithValueNotValid() throws Exception {
 		Path serverPropertiesPath = Paths.get(PROPERTIES_MALFORMED_01_URL.toURI());
-		JanusServerProperties.loadProperties(serverPropertiesPath);
+		new JanusServerProperties(serverPropertiesPath);
 	}
 
 }

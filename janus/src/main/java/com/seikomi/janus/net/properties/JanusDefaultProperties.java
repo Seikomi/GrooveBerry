@@ -13,7 +13,9 @@ public enum JanusDefaultProperties {
 	/** Command port property representation : {@code commandPort=3008} */
 	COMMAND_PORT("commandPort", "3008"),
 	/** Data port property representation : {@code dataPort=3009} */
-	DATA_PORT("dataPort", "3009");
+	DATA_PORT("dataPort", "3009"),
+	/** Reception directory for uploaded files : {@code receptionDirectory=files/} */
+	RECEPTION_DIRECTORY("receptionDirectory", "files/");
 
 	private String propertyName;
 	private String propertyValue;

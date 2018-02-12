@@ -27,8 +27,8 @@ public class ExitTest {
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
 		serverProperties = JanusPropertiesFileGenerator.createServerPropertiesFile(serverPropertiesPath);
-		JanusServerProperties.loadProperties(serverPropertiesPath);
-		server = new JanusServer() {
+		serverProperties = new JanusServerProperties(serverPropertiesPath);
+		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {
 				//Nothing to do
