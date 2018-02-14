@@ -1,6 +1,7 @@
 package com.seikomi.janus.net;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -115,6 +116,8 @@ public abstract class JanusServer implements NetworkApp {
 		} else {
 			LOGGER.error("Connect task not running : start first before stop");
 		}
+		CommandsFactory.clear();
+		Locator.clear();
 	}
 
 	/**
@@ -138,5 +141,9 @@ public abstract class JanusServer implements NetworkApp {
 	
 	public String getReceptionDirectory() {
 		return serverProperties.getReceptionDirectory();
+	}
+	
+	public Properties getServerProperties() {
+		return serverProperties.getProperties();
 	}
 }

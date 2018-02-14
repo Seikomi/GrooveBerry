@@ -17,12 +17,12 @@ import com.seikomi.janus.net.properties.JanusServerProperties;
  * @author Nicolas SYMPHORIEN (nicolas.symphorien@gmail.com)
  *
  */
-public final class JanusPropertiesFileGenerator {
+public class JanusPropertiesFileGenerator {
 
 	private static String commandPort;
 	private static String dataPort;
 
-	private JanusPropertiesFileGenerator() {
+	protected JanusPropertiesFileGenerator() {
 		// Hide the public constructor.
 	}
 
