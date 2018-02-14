@@ -20,7 +20,7 @@ public abstract class DAO<T> {
 	protected static final String SQL_TRACE_FORMAT = "SQL: {}";
 	
 	/** The H2 database connector. */
-	protected static Connection connection = ConnectionH2Database.getInstance();
+	protected static Connection connection = ConnectionH2Database.getConnection();
 
 	/**
 	 * Finds the object {@code T} in the database with his id.

@@ -3,7 +3,10 @@ package com.seikomi.grooveberry.properties;
 public enum GrooveberryDefaultProperties {
 	WELCOME_MESSAGE("welcomeMessage", "Welcome to GrooveBerry Server (0.1)"),
 	GROOVEBERRY_DIRECTORY("grooveBerryDirectory", ".grooveberry/"),
-	LIBRARY_DIRECTORY("libraryDirectory", "library/");
+	LIBRARY_DIRECTORY("libraryDirectory", "library/"),
+	DATABASE_URL("database.url", "jdbc:h2:mem:db"),
+	DATABASE_USER("database.user", "sa"),
+	DATABASE_PASSWORD("database.password", "");
 	
 	private String propertyName;
 	private String propertyValue;

@@ -145,7 +145,7 @@ public final class ReadingQueue {
 		Song removeFile = this.queue.get(index);
 		if (removeFile.getPath().equals(this.currentTrack.getAbsolutePath())) {
 			this.currentTrack.deleteObservers();
-			if (!this.queue.getLast().getPath().equals(this.currentTrack.getAbsolutePath())) {				
+			if (!this.queue.getLast().getPath().equals(this.currentTrack.getPath())) {				
 				this.currentTrack = new AudioFile(this.queue.get(currentTrackIndex + 1).getPath());
 			} else {
 				this.currentTrack = null;

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.seikomi.grooveberry.bo.ReadingQueue;
 import com.seikomi.grooveberry.bo.Song;
 import com.seikomi.grooveberry.commands.Next;
 import com.seikomi.grooveberry.commands.Pause;
@@ -48,11 +50,17 @@ public class GrooveberryServer extends JanusServer {
 
 	@Override
 	public void stop() {
-		try {
-			ConnectionH2Database.getInstance().close();
+		Connection connection = ConnectionH2Database.getConnection();
+		try (Statement statement = connection.createStatement()){
+			ClassLoader classLoader = getClass().getClassLoader();
+			File initDatabaseFile = new File(classLoader.getResource("sql/dropTables.sql").getFile());
+			statement.executeUpdate(String.format("RUNSCRIPT FROM '%s'", initDatabaseFile));
 		} catch (SQLException e) {
-			LOGGER.error("Database closing failed", e);
+			LOGGER.error("Unable to build the database", e);
 		}
+		
+		ConnectionH2Database.closeConnection();
+		ReadingQueue.getInstance().clearQueue();
 		super.stop();
 	}
 
@@ -106,7 +114,12 @@ public class GrooveberryServer extends JanusServer {
 	}
 	
 	private void initDatabase() {
-		try (Statement statement = ConnectionH2Database.getInstance().createStatement()){
+		String url = getServerProperties().getProperty("database.url");
+		String user = getServerProperties().getProperty("database.user");
+		String password = getServerProperties().getProperty("database.password");
+		Connection connection = ConnectionH2Database.getConnection(url, user, password);
+		
+		try (Statement statement = connection.createStatement()){
 			ClassLoader classLoader = getClass().getClassLoader();
 			File initDatabaseFile = new File(classLoader.getResource("sql/init.sql").getFile());
 			statement.executeUpdate(String.format("RUNSCRIPT FROM '%s'", initDatabaseFile));

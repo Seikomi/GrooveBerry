@@ -10,39 +10,39 @@ import org.slf4j.LoggerFactory;
 public class ConnectionH2Database {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionH2Database.class);
 
-	private static Connection instance;
+	private static Connection connection;
 
 	private ConnectionH2Database() {
 		// Hide the public constructor
 	}
 
-	public static Connection getInstance() {
-		if (instance == null) {
-			try {
-				Class.forName("org.h2.Driver");
-				LOGGER.trace("H2 Driver found");
-			} catch (ClassNotFoundException e) {
-				LOGGER.error("H2 Driver not found", e);
-			}
-
-			try {
-				Connection connection = DriverManager.getConnection("jdbc:h2:mem:db", "sa", "");
-				LOGGER.debug("Connection with the H2 database established");
-				instance = connection;
-			} catch (SQLException e) {
-				LOGGER.error("Unable to establish connection with the H2 database", e);
-			}
+	public static Connection getConnection(String url, String user, String password) {
+		try {
+			Class.forName("org.h2.Driver");
+			LOGGER.trace("H2 Driver found");
+		} catch (ClassNotFoundException e) {
+			LOGGER.error("H2 Driver not found", e);
 		}
-		return instance;
+
+		try {
+			connection = DriverManager.getConnection(url, user, password);
+			LOGGER.debug("Connection with the H2 database established : " + url);
+		} catch (SQLException e) {
+			LOGGER.error("Unable to establish connection with the H2 database", e);
+		}
+		return connection;
 	}
-	
+
 	public static void closeConnection() {
 		try {
-			instance.rollback();
-			instance.close();
+			connection.close();
 		} catch (SQLException e) {
 			LOGGER.error("A database access error occurs", e);
 		}
+	}
+
+	public static Connection getConnection() {
+		return connection;
 	}
 
 }
