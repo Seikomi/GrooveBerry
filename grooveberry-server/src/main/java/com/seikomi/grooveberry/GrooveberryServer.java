@@ -90,25 +90,25 @@ public class GrooveberryServer extends JanusServer {
 		File serverProperties = serverPropertiesPath.toFile();
 		File serverLibraryDirectory = serverLibraryDirectoryPath.toFile();
 		
-		createFile(mainDirectory);
-		createFile(serverProperties);
-		createFile(serverLibraryDirectory);
+		createFile(mainDirectory, true);
+		createFile(serverProperties, false);
+		createFile(serverLibraryDirectory, true);
 
 	}
 
-	private void createFile(File file) {
+	private void createFile(File file, boolean isDirectory) {
 		if (!file.exists()) {
 			try {
-				boolean isCreate = file.isDirectory() ? file.mkdir() : file.createNewFile();
+				boolean isCreate = isDirectory ? file.mkdir() : file.createNewFile();
 				if (!isCreate) {
 					throw new IOException();
 				} else {
 					String message = "Create the {} at {}";
-					LOGGER.info(message, (file.isDirectory() ? "directory" : "file"), file.getPath());
+					LOGGER.info(message, (isDirectory ? "directory" : "file"), file.getPath());
 				}
 			} catch (IOException e) {
 				String message = "An I/O exception occurs durring the creation of the Grooveberry server {} : {}";
-				LOGGER.error(message, (file.isDirectory() ? "directory" : "file"), file.getPath(), e);
+				LOGGER.error(message, (isDirectory ? "directory" : "file"), file.getPath(), e);
 			}
 		}
 	}
