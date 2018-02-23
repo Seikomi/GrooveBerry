@@ -27,7 +27,7 @@ public class TestH2Database {
 	private static PlaylistDAO playlistDAO = new PlaylistDAO();
 	
 	public static void main(String[] args) throws SQLException {
-		Statement statement = ConnectionH2Database.getInstance().createStatement();
+		Statement statement = ConnectionH2Database.getConnection().createStatement();
 		statement.executeUpdate("RUNSCRIPT FROM '" + new File("D:\\Perso\\workspace\\GrooveBerry\\grooveberry-server\\src\\main\\resources\\sql\\init.sql") + "'");
 		
 		scanLibraryDirectory();	
@@ -44,7 +44,7 @@ public class TestH2Database {
 		
 		printPlaylistInfo(playlistCreated);
 		
-		ConnectionH2Database.getInstance().close();
+		ConnectionH2Database.getConnection().close();
 
 	}
 
