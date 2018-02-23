@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.seikomi.grooveberry.bo.AudioFile;
 import com.seikomi.grooveberry.bo.Song;
+import com.seikomi.grooveberry.commands.Get;
 import com.seikomi.grooveberry.commands.Next;
 import com.seikomi.grooveberry.commands.Pause;
 import com.seikomi.grooveberry.commands.Play;
@@ -52,6 +53,7 @@ public class GrooveberryServer extends JanusServer {
 		CommandsFactory.addCommand(new VolumeUp(), "#VOLUP", this);
 		CommandsFactory.addCommand(new WhatIsTheReadingQueue(), "#LIST", this);
 		CommandsFactory.addCommand(new WhatIsThisSong(), "#SONG", this);
+		CommandsFactory.addCommand(new Get(), "#GET", this);
 
 		Locator.load(new ReadingQueueService(this));
 	}
@@ -82,18 +84,20 @@ public class GrooveberryServer extends JanusServer {
 					throw new IOException();
 				} else {
 					String message = "Create the {} at {}";
-					LOGGER.info(message, (file.isDirectory() ? "directory" : "file"), file.getPath());
+					LOGGER.info(message, file.isDirectory() ? "directory" : "file", file.getPath());
 				}
 			} catch (IOException e) {
 				String message = "An I/O exception occurs durring the creation of the Grooveberry server {} : {}";
-				LOGGER.error(message, (file.isDirectory() ? "directory" : "file"), file.getPath(), e);
+				LOGGER.error(message, file.isDirectory() ? "directory" : "file", file.getPath(), e);
 			}
 		}
 	}
 	
 	private void initDatabase() {
 		try (Statement statement = ConnectionH2Database.getInstance().createStatement()){
-			statement.executeUpdate("RUNSCRIPT FROM '" + new File("D:\\Perso\\workspace\\GrooveBerry\\grooveberry-server\\src\\main\\resources\\sql\\init.sql") + "'");
+			ClassLoader classLoader = getClass().getClassLoader();
+			File file = new File(classLoader.getResource("sql/init.sql").getFile());
+			statement.executeUpdate("RUNSCRIPT FROM '" + file + "'");
 		} catch (SQLException e) {
 			LOGGER.error("Unable to build the database", e);
 		}

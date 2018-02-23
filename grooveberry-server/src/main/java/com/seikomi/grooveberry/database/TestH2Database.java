@@ -43,6 +43,8 @@ public class TestH2Database {
 		Playlist playlistCreated = playlistDAO.create(playlist);
 		
 		printPlaylistInfo(playlistCreated);
+		
+		ConnectionH2Database.getInstance().close();
 
 	}
 

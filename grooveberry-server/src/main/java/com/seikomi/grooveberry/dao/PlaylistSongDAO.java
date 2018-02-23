@@ -22,14 +22,14 @@ public class PlaylistSongDAO {
 			preparedStatement.setLong(1, playlistId);
 			preparedStatement.setLong(2, songId);
 
-			playlistSong = executeFindQuery(songId, preparedStatement);
+			playlistSong = executeFindQuery(preparedStatement);
 		} catch (SQLException e) {
 			LOGGER.error("Unable to find the playlist song tag with the id = {}, {}", playlistId, songId, e);
 		}
 		return playlistSong;
 	}
 
-	private PlaylistSong executeFindQuery(long songId, PreparedStatement preparedStatement)
+	private PlaylistSong executeFindQuery(PreparedStatement preparedStatement)
 			throws SQLException {
 		PlaylistSong playlistSong = null;
 		try (ResultSet result = preparedStatement.executeQuery()) {
