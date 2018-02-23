@@ -21,7 +21,7 @@ public class Upload extends JanusCommand {
 		if (args == null || args.length == 0) {
 			responce = new String[] { "#UPLOAD NO FILES TO RECEIVE" };
 		} else {
-			uploadService.receive(args);
+			uploadService.receiveFiles(args);
 			responce = new String[] { "#UPLOAD STARTED" };
 		}
 

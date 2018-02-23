@@ -21,7 +21,7 @@ public class Download extends JanusCommand {
 		if (args == null || args.length == 0) {
 			responce = new String[] { "#DOWNLOAD NO FILES TO SEND" };
 		} else {
-			downloadService.send(args);
+			downloadService.sendFiles(args);
 			responce = new String[] { "#DOWNLOAD STARTED" };
 		}
 
