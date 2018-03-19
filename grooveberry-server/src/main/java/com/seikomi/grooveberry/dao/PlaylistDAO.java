@@ -29,7 +29,7 @@ public class PlaylistDAO extends DAO<Playlist> {
 	private PlaylistSongDAO playlistSongDAO;
 
 	/**
-	 * Create a new playlist DAO.
+	 * Creates a new playlist DAO.
 	 */
 	public PlaylistDAO() {
 		this.songDAO = new SongDAO();
@@ -118,7 +118,7 @@ public class PlaylistDAO extends DAO<Playlist> {
 	}
 
 	/**
-	 * Executes the find playlist query and create the playlist object according to
+	 * Executes the found playlist query and creates the playlist object according to
 	 * the database response.
 	 * 
 	 * @param playlistId

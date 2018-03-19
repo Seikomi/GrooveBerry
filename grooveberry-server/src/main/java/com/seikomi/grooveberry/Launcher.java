@@ -6,13 +6,18 @@ import java.nio.file.Paths;
 import com.seikomi.janus.net.properties.JanusServerProperties;
 
 /**
- * Hello world!
- *
+ * Launch the GrooveBerry server.
  */
-public class Launcher 
-{
-    public static void main(String[] args) throws IOException {
-    	JanusServerProperties serverProperties = new JanusServerProperties(Paths.get("server.properties"));
+public class Launcher {
+	
+	/**
+	 * Launch the GrooveBerry server.
+	 * 
+	 * @param args
+	 *            no args
+	 */
+	public static void main(String[] args) throws IOException {
+		JanusServerProperties serverProperties = new JanusServerProperties(Paths.get("server.properties"));
 		new GrooveberryServer(serverProperties).start();
-    }
+	}
 }
