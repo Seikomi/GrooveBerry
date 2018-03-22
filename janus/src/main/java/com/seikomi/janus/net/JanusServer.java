@@ -146,4 +146,11 @@ public abstract class JanusServer implements NetworkApp {
 	public Properties getServerProperties() {
 		return serverProperties.getProperties();
 	}
+
+	@Override
+	public String getProperties(String propertieName) {
+		return serverProperties.getProperties().getProperty(propertieName, null);
+	}
+	
+	
 }

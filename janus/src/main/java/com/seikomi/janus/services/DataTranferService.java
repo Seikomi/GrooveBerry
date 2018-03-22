@@ -1,7 +1,11 @@
 package com.seikomi.janus.services;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.seikomi.janus.net.JanusServer;
-import com.seikomi.janus.net.tasks.DataTransferTask;
+import com.seikomi.janus.net.tasks.FileTransferTask;
+import com.seikomi.janus.net.tasks.ObjectTransferTask;
 
 /**
  * Service to handle data transfer between the client and the server.
@@ -10,7 +14,10 @@ import com.seikomi.janus.net.tasks.DataTransferTask;
  *
  */
 public class DataTranferService extends JanusService {
-	private DataTransferTask dataTransfertTask;
+	static final Logger LOGGER = LoggerFactory.getLogger(DataTranferService.class);
+	
+	private FileTransferTask fileTransfertTask;
+	private ObjectTransferTask objectTransferTask;
 	
 	/**
 	 * Create a new instance of the data transfer service by passing in arguments the
@@ -29,40 +36,67 @@ public class DataTranferService extends JanusService {
 	 * @param fileNames
 	 *            the array of filenames of files to send.
 	 */
-	public void send(String[] fileNames) {
-		if (dataTransfertTask == null) {
-			String receptionDirectory = ((JanusServer) networkApp).getReceptionDirectory();
-			int dataPort = ((JanusServer) networkApp).getDataPort();
-			dataTransfertTask = new DataTransferTask(fileNames, receptionDirectory, dataPort, true);
-			startTask();
+	public void sendFiles(String[] fileNames) {
+		if (fileTransfertTask == null) {
+			try {
+				int dataPort = Integer.parseInt(networkApp.getProperties("dataPort"));
+				String receptionDirectory = networkApp.getProperties("receptionDirectory");
+				fileTransfertTask = new FileTransferTask(fileNames, true, dataPort, receptionDirectory);
+				startFileTranferTask();
+			} catch (NumberFormatException e) {
+				LOGGER.error("Cannot send files : data port properties malformed", e);
+			}
 		} else {
-			dataTransfertTask.addFiles(fileNames, true);
+			fileTransfertTask.addFiles(fileNames, true);
 		}
 	}
 	
+	public void sendObject(Object object) {
+		if (objectTransferTask == null) {
+			try {
+				int dataPort = Integer.parseInt(networkApp.getProperties("dataPort"));
+				objectTransferTask = new ObjectTransferTask(dataPort);
+				startObjectTranferTask();
+			} catch (NumberFormatException e) {
+				LOGGER.error("Cannot send objectq : data port properties malformed", e);
+			}
+		} else {
+			objectTransferTask.addObject(object);
+		}
+	}
+	
+	private void startObjectTranferTask() {
+		Thread objectTransferThread = new Thread(objectTransferTask, "objectTransferThread");
+		objectTransferThread.start();
+	}
+
 	/**
 	 * Sends the files identified on the file system by the array of filenames.
 	 * 
 	 * @param fileNames
 	 *            the array of filenames of files to send.
 	 */
-	public void receive(String[] fileNames) {
-		if (dataTransfertTask == null) {
-			String receptionDirectory = ((JanusServer) networkApp).getReceptionDirectory();
-			int dataPort = ((JanusServer) networkApp).getDataPort();
-			dataTransfertTask = new DataTransferTask(fileNames, receptionDirectory, dataPort, false);
-			startTask();
+	public void receiveFiles(String[] fileNames) {
+		if (fileTransfertTask == null) {
+			try {
+				int dataPort = Integer.parseInt(networkApp.getProperties("dataPort"));
+				String receptionDirectory = networkApp.getProperties("receptionDirectory");
+				fileTransfertTask = new FileTransferTask(fileNames, false, dataPort, receptionDirectory);
+				startFileTranferTask();
+			} catch (NumberFormatException e) {
+				LOGGER.error("Cannot receive files : data port properties malformed", e);
+			}
 		} else {
-			dataTransfertTask.addFiles(fileNames, false);
+			fileTransfertTask.addFiles(fileNames, false);
 		}
 	}
 	
 	/**
 	 * Starts the data transfert task.
 	 */
-	private void startTask() {
-		Thread downloadThread = new Thread(dataTransfertTask, "dataTransfertThread");
-		downloadThread.start();
+	private void startFileTranferTask() {
+		Thread fileTranfertThread = new Thread(fileTransfertTask, "fileTransfertThread");
+		fileTranfertThread.start();
 	}
 
 }

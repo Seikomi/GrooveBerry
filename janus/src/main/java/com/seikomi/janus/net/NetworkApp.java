@@ -25,5 +25,7 @@ public interface NetworkApp {
 	 * Stop the network application.
 	 */
 	public abstract void stop();
+	
+	public abstract String getProperties(String propertieName);
 
 }
