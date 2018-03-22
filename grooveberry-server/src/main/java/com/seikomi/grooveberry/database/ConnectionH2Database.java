@@ -26,7 +26,7 @@ public class ConnectionH2Database {
 
 		try {
 			connection = DriverManager.getConnection(url, user, password);
-			LOGGER.debug("Connection with the H2 database established : " + url);
+			LOGGER.debug("Connection with the H2 database established : {}", url);
 		} catch (SQLException e) {
 			LOGGER.error("Unable to establish connection with the H2 database", e);
 		}

@@ -88,6 +88,7 @@ public class SongDAO extends DAO<Song> {
 			preparedStatement.setString(1, song.getPath());
 			if (song.getSongTag() != null) {
 				preparedStatement.setLong(2, song.getSongTag().getSongTagId());
+				songTagDAO.update(song.getSongTag());
 			} else {
 				preparedStatement.setNull(2, Types.INTEGER);
 			}
