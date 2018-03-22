@@ -1,6 +1,7 @@
 package com.seikomi.janus.net;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import com.seikomi.janus.commands.Download;
 import com.seikomi.janus.commands.Exit;
 import com.seikomi.janus.commands.JanusCommand;
 import com.seikomi.janus.commands.Upload;
+import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.net.properties.JanusServerProperties;
 import com.seikomi.janus.net.tasks.ConnectTask;
 import com.seikomi.janus.services.DataTranferService;
@@ -28,6 +30,8 @@ import com.seikomi.janus.services.Locator;
  */
 public abstract class JanusServer implements NetworkApp {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JanusServer.class);
+	
+	private JanusProperties serverProperties;
 
 	private ConnectTask connectTask;
 
@@ -35,10 +39,12 @@ public abstract class JanusServer implements NetworkApp {
 	 * Create a new instance of Janus server and configure it with the
 	 * {@code .properties} file pass in argument.
 	 * 
-	 * @param serverProperties
+	 * @param janusProperties
 	 *            the server {@code .properties} file
 	 */
-	public JanusServer() {
+	public JanusServer(JanusProperties janusProperties) {
+		this.serverProperties = janusProperties;
+		
 		loadContext();
 		loadJanusContext();
 
@@ -51,7 +57,6 @@ public abstract class JanusServer implements NetworkApp {
 			LOGGER.trace("Service :");
 			for (Entry<String, JanusService> entry : Locator.getServices().entrySet()) {
 				LOGGER.trace("\t" + entry.getKey() + " : " + entry.getValue().getClass().getSimpleName());
-				//TODO get skill
 			}
 
 		}
@@ -74,13 +79,13 @@ public abstract class JanusServer implements NetworkApp {
 	@Override
 	public void start() {
 		try {
-			connectTask = new ConnectTask();
+			connectTask = new ConnectTask(serverProperties.getCommandPort());
 
 			Thread connectTread = new Thread(connectTask, "ConnectThread");
 			connectTread.start();
 
-			LOGGER.debug("Janus server start on port " + JanusServerProperties.readProperties().getCommandPort()
-					+ " for command and on port " + JanusServerProperties.readProperties().getDataPort() + " for data");
+			LOGGER.debug("Janus server start on port " + serverProperties.getCommandPort()
+					+ " for command and on port " + serverProperties.getDataPort() + " for data");
 		} catch (IOException e) {
 			LOGGER.error("An unknown error occurs during the starting of Janus server", e);
 		}
@@ -111,6 +116,8 @@ public abstract class JanusServer implements NetworkApp {
 		} else {
 			LOGGER.error("Connect task not running : start first before stop");
 		}
+		CommandsFactory.clear();
+		Locator.clear();
 	}
 
 	/**
@@ -123,4 +130,27 @@ public abstract class JanusServer implements NetworkApp {
 	public boolean isStarted() {
 		return connectTask.isWaiting();
 	}
+	
+	public int getCommandPort() {
+		return serverProperties.getCommandPort();
+	}
+	
+	public int getDataPort() {
+		return serverProperties.getDataPort();
+	}
+	
+	public String getReceptionDirectory() {
+		return serverProperties.getReceptionDirectory();
+	}
+	
+	public Properties getServerProperties() {
+		return serverProperties.getProperties();
+	}
+
+	@Override
+	public String getProperties(String propertieName) {
+		return serverProperties.getProperties().getProperty(propertieName, null);
+	}
+	
+	
 }

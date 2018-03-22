@@ -48,7 +48,7 @@ public class JanusClient implements NetworkApp {
 	 */
 	@Override
 	public void start() {
-		askConnectionTask = new AskConnectionTask();
+		askConnectionTask = new AskConnectionTask(clientProperties.getCommandPort());
 
 		Thread askConnectionThread = new Thread(askConnectionTask, "AskConnectionThread");
 		askConnectionThread.start();
@@ -98,80 +98,88 @@ public class JanusClient implements NetworkApp {
 			out.writeUTF(command);
 			out.flush();
 
-			if ("#UPLOAD LICENSE".equals(command)) {
-				Socket dataSocket = new Socket("localhost", clientProperties.getDataPort());
-				boolean isConnected = dataSocket.isConnected() && dataSocket.isBound();
-				if (isConnected) {
-
-					File fileToSend = Paths.get("LICENSE").toFile();
-					final BufferedOutputStream dataOut = new BufferedOutputStream(dataSocket.getOutputStream());
-
-					try (final BufferedInputStream fileInputStream = new BufferedInputStream(
-							new FileInputStream(fileToSend), BUFFER_SIZE)) {
-						// Header (file length)
-						byte[] header = Utils.longToBytes(fileToSend.length());
-						dataOut.write(header);
-
-						// Data
-						byte[] bytes = new byte[BUFFER_SIZE];
-						int numberOfByteRead;
-						do {
-							numberOfByteRead = fileInputStream.read(bytes);
-							if (numberOfByteRead != -1) {
-								dataOut.write(bytes, 0, numberOfByteRead);
-							}
-						} while (numberOfByteRead != -1);
-
-						dataOut.flush();
-					} catch (IOException e) {
-						LOGGER.error("An error occurs during the sending of data", e);
-					}
-				}
-				dataSocket.close();
-			}
-
-			if ("#DOWNLOAD LICENSE".equals(command)) {
-				Socket dataSocket = new Socket("localhost", clientProperties.getDataPort());
-
-				boolean isConnected = dataSocket.isConnected() && dataSocket.isBound();
-				if (isConnected) {
-					BufferedInputStream in = new BufferedInputStream(dataSocket.getInputStream());
-					String directory = "";
-					File file = new File(directory + "Test");
-
-					try (final BufferedOutputStream fileOutputStream = new BufferedOutputStream(
-							new FileOutputStream(file), BUFFER_SIZE)) {
-						// Header (file length)
-						byte[] header = new byte[Long.BYTES];
-						in.read(header, 0, header.length);
-						long fileLenth = Utils.bytesToLong(header);
-
-						// Data
-						byte[] bytes = new byte[BUFFER_SIZE];
-
-						long numberOfByteRead = 0;
-						do {
-							if (numberOfByteRead + BUFFER_SIZE <= fileLenth) {
-								in.read(bytes, 0, BUFFER_SIZE);
-								numberOfByteRead += BUFFER_SIZE;
-							} else {
-								int numberOfBytesToReadRemaining = Math.toIntExact(fileLenth - numberOfByteRead);
-								in.read(bytes, 0, numberOfBytesToReadRemaining);
-								numberOfByteRead += numberOfBytesToReadRemaining;
-							}
-							fileOutputStream.write(bytes);
-							fileOutputStream.flush();
-						} while (numberOfByteRead < fileLenth);
-					} catch (IOException e) {
-						LOGGER.error("An error occurs during the reception of data", e);
-					}
-
-					dataSocket.close();
-				}
+			switch (command) {
+			case "#UPLOAD LICENSE":
+				uploadLicenceFile();
+				break;
+			case "#DOWNLOAD LICENSE":
+				downloadLicenceFile();
+				break;
+			default:
+				break;
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("An error occur during the treatment of a send command", e);
+		}
+	}
+
+	private void downloadLicenceFile() throws IOException {
+		try (Socket dataSocket = new Socket("localhost", clientProperties.getDataPort())) {
+			boolean isConnected = dataSocket.isConnected() && dataSocket.isBound();
+			if (isConnected) {
+				BufferedInputStream in = new BufferedInputStream(dataSocket.getInputStream());
+				File file = new File(clientProperties.getReceptionDirectory() + "\\LICENSE");
+
+				try (final BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(file),
+						BUFFER_SIZE)) {
+					// Header (file length)
+					byte[] header = new byte[Long.BYTES];
+					in.read(header, 0, header.length);
+					long fileLenth = Utils.bytesToLong(header);
+
+					// Data
+					byte[] bytes = new byte[BUFFER_SIZE];
+
+					long numberOfByteRead = 0;
+					do {
+						if (numberOfByteRead + BUFFER_SIZE <= fileLenth) {
+							in.read(bytes, 0, BUFFER_SIZE);
+							numberOfByteRead += BUFFER_SIZE;
+						} else {
+							int numberOfBytesToReadRemaining = Math.toIntExact(fileLenth - numberOfByteRead);
+							in.read(bytes, 0, numberOfBytesToReadRemaining);
+							numberOfByteRead += numberOfBytesToReadRemaining;
+						}
+						fileOutputStream.write(bytes);
+						fileOutputStream.flush();
+					} while (numberOfByteRead < fileLenth);
+				} catch (IOException e) {
+					LOGGER.error("An error occurs during the reception of data", e);
+				}
+			}
+		}
+
+	}
+
+	private void uploadLicenceFile() throws IOException {
+		try (Socket dataSocket = new Socket("localhost", clientProperties.getDataPort())) {
+			boolean isConnected = dataSocket.isConnected() && dataSocket.isBound();
+			if (isConnected) {
+
+				File fileToSend = Paths.get("LICENSE").toFile();
+				final BufferedOutputStream dataOut = new BufferedOutputStream(dataSocket.getOutputStream());
+
+				try (final BufferedInputStream fileInputStream = new BufferedInputStream(
+						new FileInputStream(fileToSend), BUFFER_SIZE)) {
+					// Header (file length)
+					byte[] header = Utils.longToBytes(fileToSend.length());
+					dataOut.write(header);
+
+					// Data
+					byte[] bytes = new byte[BUFFER_SIZE];
+					int numberOfByteRead;
+					do {
+						numberOfByteRead = fileInputStream.read(bytes);
+						if (numberOfByteRead != -1) {
+							dataOut.write(bytes, 0, numberOfByteRead);
+						}
+					} while (numberOfByteRead != -1);
+
+					dataOut.flush();
+				} catch (IOException e) {
+					LOGGER.error("An error occurs during the sending of data", e);
+				}
+			}
 		}
 	}
 
@@ -180,8 +188,9 @@ public class JanusClient implements NetworkApp {
 		askConnectionTask.getOutputStream().flush();
 	}
 
-	public void addObserver(Observer observer) {
-		askConnectionTask.addObserver(observer);
+	@Override
+	public String getProperties(String propertieName) {
+		return clientProperties.getProperties().getProperty(propertieName, null);
 	}
 
 }

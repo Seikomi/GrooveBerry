@@ -12,6 +12,7 @@ import com.seikomi.janus.net.JanusServer;
 import com.seikomi.janus.services.JanusService;
 import com.seikomi.grooveberry.bo.AudioFile;
 import com.seikomi.grooveberry.bo.ReadingQueue;
+import com.seikomi.grooveberry.bo.Song;
 import com.seikomi.grooveberry.utils.AudioUtility;
 
 public class ReadingQueueService extends JanusService implements Observer {
@@ -104,13 +105,13 @@ public class ReadingQueueService extends JanusService implements Observer {
 
 	public String whatIsTheReadingQueue() {
 		StringBuilder stringBuilder = new StringBuilder();
-		for (AudioFile audioFile : readingQueue.getAudioFileList()) {
-			if (audioFile.equals(readingQueue.getCurrentTrack())) {
+		for (Song audioFile : readingQueue.getAudioFileList()) {
+			if (audioFile.getPath().equals(readingQueue.getCurrentTrack().getAbsolutePath())) {
 				stringBuilder.append("=> ");
 			} else {
 				stringBuilder.append("   ");
 			}
-			stringBuilder.append(audioFile.getName());
+			stringBuilder.append(audioFile.getFileName());
 			stringBuilder.append("\n");
 		}
 		return stringBuilder.toString();
@@ -262,7 +263,7 @@ public class ReadingQueueService extends JanusService implements Observer {
 		LOGGER.info("Stop of Play event");
 	}
 
-	public void addToReadingQueue(List<AudioFile> audioFileList) {
+	public void addToReadingQueue(List<Song> audioFileList) {
 		readingQueue.addList(audioFileList);
 
 	}

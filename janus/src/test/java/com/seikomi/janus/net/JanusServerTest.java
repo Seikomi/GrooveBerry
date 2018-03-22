@@ -29,8 +29,8 @@ public class JanusServerTest {
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
 		serverProperties = JanusPropertiesFileGenerator.createServerPropertiesFile(serverPropertiesPath);
-		JanusServerProperties.loadProperties(serverPropertiesPath);
-		server = new JanusServer() {
+		JanusServerProperties serverProperties = new JanusServerProperties(serverPropertiesPath);
+		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {
 				//Nothing to do
@@ -56,12 +56,12 @@ public class JanusServerTest {
 
 	@Test
 	public void testGetCommandPort() throws IOException {
-		assertEquals(serverProperties.getCommandPort(), JanusServerProperties.readProperties().getCommandPort());
+		assertEquals(serverProperties.getCommandPort(), serverProperties.getCommandPort());
 	}
 
 	@Test
 	public void testGetDataPort() throws IOException {
-		assertEquals(serverProperties.getDataPort(), JanusServerProperties.readProperties().getDataPort());
+		assertEquals(serverProperties.getDataPort(), serverProperties.getDataPort());
 	}
 
 }

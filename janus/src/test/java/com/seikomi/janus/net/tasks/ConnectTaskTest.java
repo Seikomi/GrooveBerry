@@ -31,8 +31,7 @@ public class ConnectTaskTest {
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
 		serverProperties = JanusPropertiesFileGenerator.createServerPropertiesFile(serverPropertiesPath);
-		JanusServerProperties.loadProperties(serverPropertiesPath);
-		server = new JanusServer() {
+		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {
 				//Nothing to do
@@ -52,7 +51,7 @@ public class ConnectTaskTest {
 
 	@Test
 	public void testOneClientConnection() throws UnknownHostException, IOException {
-		Socket clientSocket = new Socket(InetAddress.getLocalHost(), JanusServerProperties.readProperties().getCommandPort());
+		Socket clientSocket = new Socket(InetAddress.getLocalHost(), serverProperties.getCommandPort());
 		boolean isConnected = clientSocket.isConnected() && clientSocket.isBound();
 
 		assertTrue(isConnected);
@@ -62,11 +61,10 @@ public class ConnectTaskTest {
 	
 	@Test
 	public void testMultiClientConnection() throws UnknownHostException, IOException, InterruptedException {
-		
 		final int NUMBER_OF_CLIENT = 5;
 		Socket[] clientsSockets = new Socket[NUMBER_OF_CLIENT];
 		for (int i = 0; i < clientsSockets.length; i++) {
-			clientsSockets[i] = new Socket(InetAddress.getLocalHost(), JanusServerProperties.readProperties().getCommandPort());
+			clientsSockets[i] = new Socket(InetAddress.getLocalHost(), serverProperties.getCommandPort());
 			boolean isConnected = clientsSockets[i].isConnected() && clientsSockets[i].isBound();
 			assertTrue(isConnected);
 		}

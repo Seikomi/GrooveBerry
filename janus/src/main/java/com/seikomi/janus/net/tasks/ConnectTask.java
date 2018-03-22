@@ -9,8 +9,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.seikomi.janus.net.properties.JanusServerProperties;
-
 /**
  * Janus task that handle all client connection, it is based on one-thread-per-client
  * design. At the instantiation this task create a server socket on command
@@ -37,8 +35,8 @@ public class ConnectTask extends JanusTask {
 	 * @throws IOException
 	 *             if an I/O errors occurs
 	 */
-	public ConnectTask() throws IOException {
-		this.serverCommandSocket = new ServerSocket(JanusServerProperties.readProperties().getCommandPort());
+	public ConnectTask(int commandPort) throws IOException {
+		this.serverCommandSocket = new ServerSocket(commandPort);
 		treatmentTasks = new ArrayList<>();
 	}
 

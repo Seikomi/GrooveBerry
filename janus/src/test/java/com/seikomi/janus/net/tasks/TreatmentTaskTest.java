@@ -32,8 +32,8 @@ public class TreatmentTaskTest {
 	@Before
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
-		JanusServerProperties.loadProperties(serverPropertiesPath);
-		server = new JanusServer() {
+		serverProperties = new JanusServerProperties(serverPropertiesPath);
+		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {
 				//Nothing to do
@@ -52,8 +52,8 @@ public class TreatmentTaskTest {
 	}
 
 	@Test
-	public void testRecieveWelcomeMessageFromServer() throws UnknownHostException, IOException {
-		Socket clientSocket = new Socket(InetAddress.getLocalHost(), JanusServerProperties.readProperties().getCommandPort());
+	public void testReceiveWelcomeMessageFromServer() throws UnknownHostException, IOException {
+		Socket clientSocket = new Socket(InetAddress.getLocalHost(), serverProperties.getCommandPort());
 		boolean isConnected = clientSocket.isConnected() && clientSocket.isBound();
 
 		if (isConnected) {
@@ -67,7 +67,7 @@ public class TreatmentTaskTest {
 
 	@Test
 	public void testSendMessageToServer() throws UnknownHostException, IOException {
-		Socket clientSocket = new Socket(InetAddress.getLocalHost(), JanusServerProperties.readProperties().getCommandPort());
+		Socket clientSocket = new Socket(InetAddress.getLocalHost(), serverProperties.getCommandPort());
 		boolean isConnected = clientSocket.isConnected() && clientSocket.isBound();
 
 		if (isConnected) {
