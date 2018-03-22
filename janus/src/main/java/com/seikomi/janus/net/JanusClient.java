@@ -188,4 +188,9 @@ public class JanusClient implements NetworkApp {
 		askConnectionTask.getOutputStream().flush();
 	}
 
+	@Override
+	public String getProperties(String propertieName) {
+		return clientProperties.getProperties().getProperty(propertieName, null);
+	}
+
 }
