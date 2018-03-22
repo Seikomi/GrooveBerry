@@ -19,6 +19,7 @@ public class ReadingQueueService extends JanusService implements Observer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReadingQueueService.class);
 	private ReadingQueue readingQueue = ReadingQueue.getInstance();
+	public final static char DATA_SEPARATOR = ';';
 
 	public ReadingQueueService(JanusServer server) {
 		super(server);
@@ -105,14 +106,17 @@ public class ReadingQueueService extends JanusService implements Observer {
 
 	public String whatIsTheReadingQueue() {
 		StringBuilder stringBuilder = new StringBuilder();
-		for (Song audioFile : readingQueue.getAudioFileList()) {
-			if (audioFile.getPath().equals(readingQueue.getCurrentTrack().getAbsolutePath())) {
-				stringBuilder.append("=> ");
-			} else {
-				stringBuilder.append("   ");
-			}
+		int position = 0;
+		for (Song audioFile : readingQueue.getAudioFileList()) 
+		{	//Format NOM_FICHIER;bool_isCurrentTrack
 			stringBuilder.append(audioFile.getFileName());
+			if (readingQueue.getCurrentTrackPosition() == position) {
+				stringBuilder.append(DATA_SEPARATOR + "1");
+			} else {
+				stringBuilder.append(DATA_SEPARATOR + "0");
+			}
 			stringBuilder.append("\n");
+			position++;
 		}
 		return stringBuilder.toString();
 	}
