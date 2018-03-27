@@ -23,9 +23,11 @@ import com.seikomi.grooveberry.commands.VolumeDown;
 import com.seikomi.grooveberry.commands.VolumeUp;
 import com.seikomi.grooveberry.commands.WhatIsTheReadingQueue;
 import com.seikomi.grooveberry.commands.WhatIsThisSong;
+import com.seikomi.grooveberry.commands.YoutubeDownload;
 import com.seikomi.grooveberry.dao.SongDAO;
 import com.seikomi.grooveberry.database.ConnectionH2Database;
 import com.seikomi.grooveberry.services.ReadingQueueService;
+import com.seikomi.grooveberry.services.YoutubeTransfertService;
 import com.seikomi.grooveberry.utils.AudioFileDirectoryScanner;
 import com.seikomi.janus.commands.CommandsFactory;
 import com.seikomi.janus.net.JanusServer;
@@ -76,8 +78,10 @@ public class GrooveberryServer extends JanusServer {
 		CommandsFactory.addCommand(new WhatIsTheReadingQueue(), "#LIST", this);
 		CommandsFactory.addCommand(new WhatIsThisSong(), "#SONG", this);
 		CommandsFactory.addCommand(new Get(), "#GET", this);
+		CommandsFactory.addCommand(new YoutubeDownload(), "#Y_DOWNLOAD", this);
 
 		Locator.load(new ReadingQueueService(this));
+		Locator.load(new YoutubeTransfertService(this));
 	}
 
 	/**
