@@ -27,7 +27,7 @@ public class YoutubeTransfertService extends DataTranferService {
 	private void youtubeDownloadCall(String url) throws IOException {
 		Path path = Paths.get(GrooveberryServer.USER_HOME_PATH + "/.grooveberry/library/");
 		Process p = Runtime.getRuntime().exec(
-				new String[] { "youtube-dl.exe", "-x", "--audio-format", "mp3", "-o", path + "/%(title)s.mp3", url });
+				new String[] { "youtube-dl.exe", "-x", "--audio-format", "mp3", "-o", path + "/%(title)s.%(ext)s", url });
 
 		new Thread("YoutubeDownloadThread") {
 			
