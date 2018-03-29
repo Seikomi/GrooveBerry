@@ -5,13 +5,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.seikomi.grooveberry.GrooveberryServer;
+import com.seikomi.grooveberry.bo.Song;
 import com.seikomi.janus.net.JanusServer;
 import com.seikomi.janus.services.DataTranferService;
+import com.seikomi.janus.services.Locator;
 
 public class YoutubeTransfertService extends DataTranferService {
 	static final Logger LOGGER = LoggerFactory.getLogger(YoutubeTransfertService.class);
@@ -35,8 +39,20 @@ public class YoutubeTransfertService extends DataTranferService {
 			public void run() {
 				try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
 					String line = "";
+					String fileName = null;
 					while ((line = reader.readLine()) != null) {
 						LOGGER.info(line);
+						if (line.matches("\\[ffmpeg\\].*")) {
+							String[] splitedString = line.split("Destination: ");
+							fileName = splitedString[splitedString.length - 1];
+						}
+					}
+					if (fileName != null) {
+						Song addedSong = new Song();
+						addedSong.setPath(fileName);
+						List<Song> songsToAdd = new ArrayList<>();
+						songsToAdd.add(addedSong);
+						Locator.getService(ReadingQueueService.class, networkApp).addToReadingQueue(songsToAdd);
 					}
 
 				} catch (IOException e) {
