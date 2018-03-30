@@ -3,7 +3,6 @@ package com.seikomi.grooveberry.utils;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import com.seikomi.janus.net.properties.JanusDefaultProperties;
 import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.utils.JanusPropertiesFileGenerator;
 
@@ -13,6 +12,8 @@ public class GrooveberryPropertiesFileGenerator extends JanusPropertiesFileGener
 //		JanusProperties serverProperties = JanusPropertiesFileGenerator
 //				.createServerPropertiesFile(serverPropertiesFilePath, JanusDefaultProperties.COMMAND_PORT.getPropertyValueAsInt(), 3009);
 		JanusProperties serverProperties = new JanusProperties(serverPropertiesFilePath);
+		serverProperties.getProperties().put("server.directories.root","~/.grooveberry/");
+		serverProperties.getProperties().put("server.directories.library","~/.grooveberry/library/");
 		serverProperties.getProperties().put("database.url","jdbc:h2:mem:db");
 		serverProperties.getProperties().put("database.user", "sa");
 		serverProperties.getProperties().put("database.pasword", "");
