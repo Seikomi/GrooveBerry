@@ -18,7 +18,6 @@ import com.seikomi.grooveberry.utils.GrooveberryPropertiesFileGenerator;
 import com.seikomi.janus.commands.CommandsFactory;
 import com.seikomi.janus.net.properties.JanusServerProperties;
 import com.seikomi.janus.services.Locator;
-import com.seikomi.janus.utils.JanusPropertiesFileGenerator;
 
 //TODO Use test property
 public class PrevTest {

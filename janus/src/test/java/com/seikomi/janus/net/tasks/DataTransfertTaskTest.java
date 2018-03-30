@@ -1,5 +1,6 @@
 package com.seikomi.janus.net.tasks;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -11,11 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.Callable;
 
-import static org.awaitility.Awaitility.await;
 import org.awaitility.Duration;
 import org.junit.After;
 import org.junit.Before;
@@ -116,7 +114,7 @@ public class DataTransfertTaskTest {
 	}
 
 	@Test
-	public void testUploadTransfertBeetweenClientAndServer() throws InterruptedException {
+	public void testUploadTransfertBeetweenClientAndServer() throws InterruptedException, IOException {
 		Thread.sleep(1000);
 		client.executeCommand("#UPLOAD LICENSE");
 		try {
@@ -124,10 +122,8 @@ public class DataTransfertTaskTest {
 			Iterator<Path> iterator = stream.iterator();
 			assertTrue(iterator.hasNext());
 			assertEquals("LICENSE", iterator.next().getFileName().toString());
-//			return true;
 		} catch (IOException e) {
 			fail(e.getMessage());
-//			return false;
 		}
 	}
 
