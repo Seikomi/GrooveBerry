@@ -23,10 +23,8 @@ import org.junit.rules.TemporaryFolder;
 
 import com.seikomi.janus.net.JanusClient;
 import com.seikomi.janus.net.JanusServer;
-import com.seikomi.janus.net.properties.JanusClientProperties;
 import com.seikomi.janus.net.properties.JanusDefaultProperties;
 import com.seikomi.janus.net.properties.JanusProperties;
-import com.seikomi.janus.net.properties.JanusServerProperties;
 import com.seikomi.janus.utils.JanusPropertiesFileGenerator;
 
 /**
@@ -62,7 +60,7 @@ public class DataTransfertTaskTest {
 		propertiesFiles[1].getProperties().setProperty(JanusDefaultProperties.RECEPTION_DIRECTORY.getPropertyName(),
 				clientFolder.getAbsolutePath());
 
-		JanusServerProperties serverProperties = (JanusServerProperties) propertiesFiles[0];
+		JanusProperties serverProperties = propertiesFiles[0];
 		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {
@@ -72,7 +70,7 @@ public class DataTransfertTaskTest {
 		};
 		server.start();
 
-		JanusClientProperties clientProperties = (JanusClientProperties) propertiesFiles[1];
+		JanusProperties clientProperties = propertiesFiles[1];
 		client = new JanusClient(clientProperties);
 		client.start();
 	}
@@ -91,7 +89,12 @@ public class DataTransfertTaskTest {
 
 	@Test
 	public void testDownloadTransfertBeetweenClientAndServer() throws InterruptedException {
-		await().atMost(Duration.ONE_SECOND).until(testDownload());
+		await().atMost(Duration.ONE_SECOND.plus(Duration.ONE_SECOND)).until(testDownload());
+	}
+	
+	@Test
+	public void testUploadTransfertBeetweenClientAndServer() throws InterruptedException {
+		await().atMost(Duration.ONE_SECOND.plus(Duration.ONE_SECOND)).until(testUpload());
 	}
 
 	private Callable<Boolean> testDownload() {
@@ -111,20 +114,6 @@ public class DataTransfertTaskTest {
 				}
 			}
 		};
-	}
-
-	@Test
-	public void testUploadTransfertBeetweenClientAndServer() throws InterruptedException, IOException {
-		Thread.sleep(1000);
-		client.executeCommand("#UPLOAD LICENSE");
-		try {
-			DirectoryStream<Path> stream = Files.newDirectoryStream(serverFolder.toPath());
-			Iterator<Path> iterator = stream.iterator();
-			assertTrue(iterator.hasNext());
-			assertEquals("LICENSE", iterator.next().getFileName().toString());
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
 	}
 
 	private Callable<Boolean> testUpload() {

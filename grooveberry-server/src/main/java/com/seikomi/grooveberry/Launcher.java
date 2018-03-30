@@ -3,7 +3,7 @@ package com.seikomi.grooveberry;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-import com.seikomi.janus.net.properties.JanusServerProperties;
+import com.seikomi.janus.net.properties.JanusProperties;
 
 /**
  * Launch the GrooveBerry server.
@@ -17,7 +17,7 @@ public class Launcher {
 	 *            no args
 	 */
 	public static void main(String[] args) throws IOException {
-		JanusServerProperties serverProperties = new JanusServerProperties(Paths.get("server.properties"));
+		JanusProperties serverProperties = new JanusProperties(Paths.get("server.properties"));
 		new GrooveberryServer(serverProperties).start();
 	}
 }

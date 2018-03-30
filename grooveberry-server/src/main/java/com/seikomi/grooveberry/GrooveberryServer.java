@@ -29,16 +29,18 @@ import com.seikomi.grooveberry.database.ConnectionH2Database;
 import com.seikomi.grooveberry.services.ReadingQueueService;
 import com.seikomi.grooveberry.services.YoutubeTransfertService;
 import com.seikomi.grooveberry.utils.AudioFileDirectoryScanner;
+import com.seikomi.grooveberry.utils.GrooveberryPropertiesFileGenerator;
 import com.seikomi.janus.commands.CommandsFactory;
 import com.seikomi.janus.net.JanusServer;
-import com.seikomi.janus.net.properties.JanusServerProperties;
+import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.services.Locator;
+import com.seikomi.janus.utils.Utils;
 
 public class GrooveberryServer extends JanusServer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GrooveberryServer.class);
 	public static final String USER_HOME_PATH = System.getProperty("user.home");
-	
-	public GrooveberryServer(JanusServerProperties serverProperties) {
+
+	public GrooveberryServer(JanusProperties serverProperties) {
 		super(serverProperties);
 	}
 
@@ -49,19 +51,19 @@ public class GrooveberryServer extends JanusServer {
 		initReadingQueue();
 
 		super.start();
-	}	
+	}
 
 	@Override
 	public void stop() {
 		Connection connection = ConnectionH2Database.getConnection();
-		try (Statement statement = connection.createStatement()){
+		try (Statement statement = connection.createStatement()) {
 			ClassLoader classLoader = getClass().getClassLoader();
 			File initDatabaseFile = new File(classLoader.getResource("sql/dropTables.sql").getFile());
 			statement.executeUpdate(String.format("RUNSCRIPT FROM '%s'", initDatabaseFile));
 		} catch (SQLException e) {
 			LOGGER.error("Unable to build the database", e);
 		}
-		
+
 		ConnectionH2Database.closeConnection();
 		ReadingQueue.getInstance().clearQueue();
 		super.stop();
@@ -88,14 +90,25 @@ public class GrooveberryServer extends JanusServer {
 	 * Initialize library directory and the .properties file.
 	 */
 	private void initServerFiles() {
-		Path mainDirectoryPath = Paths.get(USER_HOME_PATH + "/.grooveberry/");
-		Path serverPropertiesPath = Paths.get(USER_HOME_PATH + "/.grooveberry/grooveberry.properties");
-		Path serverLibraryDirectoryPath = Paths.get(USER_HOME_PATH + "/.grooveberry/library/");
+		Path mainDirectoryPath = Utils.transformStringPath(getProperties("server.directories.root"));
+		Path serverLibraryDirectoryPath = Utils.transformStringPath(getProperties("server.directories.library"));
+		Path serverPropertiesPath = Utils
+				.transformStringPath(getProperties("server.directories.root") + "grooveberry.properties");
+		
+//		try {
+//			GrooveberryPropertiesFileGenerator.createServerPropertiesFile(serverPropertiesPath);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+
+
 
 		File mainDirectory = mainDirectoryPath.toFile();
 		File serverProperties = serverPropertiesPath.toFile();
 		File serverLibraryDirectory = serverLibraryDirectoryPath.toFile();
-		
+
 		createFile(mainDirectory, true);
 		createFile(serverProperties, false);
 		createFile(serverLibraryDirectory, true);
@@ -118,14 +131,14 @@ public class GrooveberryServer extends JanusServer {
 			}
 		}
 	}
-	
+
 	private void initDatabase() {
-		String url = getServerProperties().getProperty("database.url");
-		String user = getServerProperties().getProperty("database.user");
-		String password = getServerProperties().getProperty("database.password");
+		String url = getProperties("database.url");
+		String user = getProperties("database.user");
+		String password = getProperties("database.password");
 		Connection connection = ConnectionH2Database.getConnection(url, user, password);
-		
-		try (Statement statement = connection.createStatement()){
+
+		try (Statement statement = connection.createStatement()) {
 			ClassLoader classLoader = getClass().getClassLoader();
 			File initDatabaseFile = new File(classLoader.getResource("sql/init.sql").getFile());
 			statement.executeUpdate(String.format("RUNSCRIPT FROM '%s'", initDatabaseFile));
@@ -143,10 +156,10 @@ public class GrooveberryServer extends JanusServer {
 
 			if (directoryPath.toFile().exists()) {
 				SongDAO songDAO = new SongDAO();
-				
+
 				LOGGER.debug("Scanning audio files in directory : {}", directoryPath.toAbsolutePath());
 				AudioFileDirectoryScanner directoryScanner = new AudioFileDirectoryScanner(directoryPath);
-				
+
 				LOGGER.debug("Populate the database");
 				for (Song song : directoryScanner.getSongList()) {
 					songDAO.create(song);

@@ -16,13 +16,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.seikomi.janus.net.JanusServer;
-import com.seikomi.janus.net.properties.JanusServerProperties;
+import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.utils.JanusPropertiesFileGenerator;
+import com.seikomi.janus.utils.Utils;
 
 public class ConnectTaskTest {
 
 	private JanusServer server;
-	private JanusServerProperties serverProperties;
+	private JanusProperties serverProperties;
 	
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -51,7 +52,7 @@ public class ConnectTaskTest {
 
 	@Test
 	public void testOneClientConnection() throws UnknownHostException, IOException {
-		Socket clientSocket = new Socket(InetAddress.getLocalHost(), serverProperties.getCommandPort());
+		Socket clientSocket = new Socket(InetAddress.getLocalHost(), getCommandPort());
 		boolean isConnected = clientSocket.isConnected() && clientSocket.isBound();
 
 		assertTrue(isConnected);
@@ -64,13 +65,17 @@ public class ConnectTaskTest {
 		final int NUMBER_OF_CLIENT = 5;
 		Socket[] clientsSockets = new Socket[NUMBER_OF_CLIENT];
 		for (int i = 0; i < clientsSockets.length; i++) {
-			clientsSockets[i] = new Socket(InetAddress.getLocalHost(), serverProperties.getCommandPort());
+			clientsSockets[i] = new Socket(InetAddress.getLocalHost(), getCommandPort());
 			boolean isConnected = clientsSockets[i].isConnected() && clientsSockets[i].isBound();
 			assertTrue(isConnected);
 		}
 		for (Socket socket : clientsSockets) {
 			socket.close();
 		}
+	}
+	
+	private Integer getCommandPort() {
+		return Utils.convertStringToInt(server.getProperties("server.ports.command"));
 	}
 
 }
