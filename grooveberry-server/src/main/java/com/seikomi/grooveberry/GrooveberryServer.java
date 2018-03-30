@@ -29,7 +29,6 @@ import com.seikomi.grooveberry.database.ConnectionH2Database;
 import com.seikomi.grooveberry.services.ReadingQueueService;
 import com.seikomi.grooveberry.services.YoutubeTransfertService;
 import com.seikomi.grooveberry.utils.AudioFileDirectoryScanner;
-import com.seikomi.grooveberry.utils.GrooveberryPropertiesFileGenerator;
 import com.seikomi.janus.commands.CommandsFactory;
 import com.seikomi.janus.net.JanusServer;
 import com.seikomi.janus.net.properties.JanusProperties;
