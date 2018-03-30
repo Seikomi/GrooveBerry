@@ -19,12 +19,13 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.seikomi.janus.net.JanusServer;
-import com.seikomi.janus.net.properties.JanusServerProperties;
+import com.seikomi.janus.net.properties.JanusProperties;
+import com.seikomi.janus.utils.Utils;
 
 public class TreatmentTaskTest {
 
 	private JanusServer server;
-	private JanusServerProperties serverProperties;
+	private JanusProperties serverProperties;
 
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -32,13 +33,13 @@ public class TreatmentTaskTest {
 	@Before
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
-		serverProperties = new JanusServerProperties(serverPropertiesPath);
+		serverProperties = new JanusProperties(serverPropertiesPath);
 		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {
-				//Nothing to do
+				// Nothing to do
 			}
-			
+
 		};
 		server.start();
 	}
@@ -53,7 +54,7 @@ public class TreatmentTaskTest {
 
 	@Test
 	public void testReceiveWelcomeMessageFromServer() throws UnknownHostException, IOException {
-		Socket clientSocket = new Socket(InetAddress.getLocalHost(), serverProperties.getCommandPort());
+		Socket clientSocket = new Socket(InetAddress.getLocalHost(), getCommandPort());
 		boolean isConnected = clientSocket.isConnected() && clientSocket.isBound();
 
 		if (isConnected) {
@@ -67,7 +68,7 @@ public class TreatmentTaskTest {
 
 	@Test
 	public void testSendMessageToServer() throws UnknownHostException, IOException {
-		Socket clientSocket = new Socket(InetAddress.getLocalHost(), serverProperties.getCommandPort());
+		Socket clientSocket = new Socket(InetAddress.getLocalHost(), getCommandPort());
 		boolean isConnected = clientSocket.isConnected() && clientSocket.isBound();
 
 		if (isConnected) {
@@ -85,6 +86,10 @@ public class TreatmentTaskTest {
 		}
 
 		clientSocket.close();
+	}
+
+	private Integer getCommandPort() {
+		return Utils.convertStringToInt(server.getProperties("server.ports.command"));
 	}
 
 }

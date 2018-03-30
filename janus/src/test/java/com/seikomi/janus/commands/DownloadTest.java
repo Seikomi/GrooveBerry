@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import com.seikomi.janus.net.JanusServer;
-import com.seikomi.janus.net.properties.JanusServerProperties;
+import com.seikomi.janus.net.properties.JanusProperties;
 
 public class DownloadTest {
 
@@ -24,7 +24,7 @@ public class DownloadTest {
 	@Before
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
-		JanusServerProperties serverProperties = new JanusServerProperties(serverPropertiesPath);
+		JanusProperties serverProperties = new JanusProperties(serverPropertiesPath);
 		server = new JanusServer(serverProperties) {
 			@Override
 			protected void loadContext() {

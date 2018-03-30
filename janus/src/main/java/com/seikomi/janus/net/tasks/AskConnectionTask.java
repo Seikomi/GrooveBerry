@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Deque;
+import java.util.LinkedList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +23,14 @@ public class AskConnectionTask extends JanusTask {
 	private Socket commandSocket;
 	private DataInputStream in;
 	private DataOutputStream out;
+	
+	private Deque<String> responses;
 
 	private int commandPort;
 
 	public AskConnectionTask(int commandPort) {
 		this.commandPort = commandPort;
+		this.responses = new LinkedList<>();
 	}
 
 	/**
@@ -50,8 +55,13 @@ public class AskConnectionTask extends JanusTask {
 	@Override
 	public void loop() {
 		try {
-			String message = in.readUTF();
-			LOGGER.info(message);
+			String response = in.readUTF();
+			responses.add(response);
+			
+			setChanged();
+			notifyObservers(response);
+			
+			LOGGER.info(response);
 
 		} catch (IOException e) {
 			LOGGER.error("An error occurs during connection establishment", e);
@@ -91,6 +101,10 @@ public class AskConnectionTask extends JanusTask {
 	 */
 	public DataOutputStream getOutputStream() {
 		return out;
+	}
+
+	public String getCommandResponse() {
+		return responses.getLast();
 	}
 
 }

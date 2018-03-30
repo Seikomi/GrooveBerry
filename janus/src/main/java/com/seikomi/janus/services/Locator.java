@@ -55,7 +55,11 @@ public class Locator {
 	 * @return the service associated with the Janus server
 	 */
 	public static <T extends JanusService> T getService(Class<T> serviceClass, NetworkApp associatedNetworkApp) {
-		return serviceClass.cast(getService(serviceClass.getSimpleName(), associatedNetworkApp));
+		JanusService service = getService(serviceClass.getSimpleName(), associatedNetworkApp);
+		if (service == null) {
+			LOGGER.error("Service not found : add it to the application context");
+		}
+		return serviceClass.cast(service);
 	}
 
 	/**

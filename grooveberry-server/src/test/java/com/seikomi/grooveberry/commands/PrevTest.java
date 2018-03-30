@@ -16,15 +16,14 @@ import com.seikomi.grooveberry.bo.ReadingQueue;
 import com.seikomi.grooveberry.services.ReadingQueueService;
 import com.seikomi.grooveberry.utils.GrooveberryPropertiesFileGenerator;
 import com.seikomi.janus.commands.CommandsFactory;
-import com.seikomi.janus.net.properties.JanusServerProperties;
+import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.services.Locator;
-import com.seikomi.janus.utils.JanusPropertiesFileGenerator;
 
 //TODO Use test property
 public class PrevTest {
 	
 	private GrooveberryServer server;
-	private JanusServerProperties serverProperties;
+	private JanusProperties serverProperties;
 	
 	@Rule
 	public TemporaryFolder temporaryFolder = new TemporaryFolder();
@@ -32,8 +31,7 @@ public class PrevTest {
 	@Before
 	public void setUp() throws Exception {
 		Path serverPropertiesPath = Paths.get(temporaryFolder.getRoot().getPath() + "serverTest.properties");
-		Path fileDatabasePath = Paths.get(temporaryFolder.getRoot().getPath() + "dbPrevTest");
-		serverProperties = GrooveberryPropertiesFileGenerator.createServerPropertiesFile(serverPropertiesPath, fileDatabasePath.toString());
+		serverProperties = GrooveberryPropertiesFileGenerator.createServerPropertiesFile(serverPropertiesPath);
 		server = new GrooveberryServer(serverProperties) {
 			@Override
 			protected void loadContext() {

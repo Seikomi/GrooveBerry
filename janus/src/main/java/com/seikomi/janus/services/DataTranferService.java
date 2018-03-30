@@ -39,8 +39,8 @@ public class DataTranferService extends JanusService {
 	public void sendFiles(String[] fileNames) {
 		if (fileTransfertTask == null) {
 			try {
-				int dataPort = Integer.parseInt(networkApp.getProperties("dataPort"));
-				String receptionDirectory = networkApp.getProperties("receptionDirectory");
+				int dataPort = Integer.parseInt(networkApp.getProperties("server.ports.data"));
+				String receptionDirectory = networkApp.getProperties("server.directories.files");
 				fileTransfertTask = new FileTransferTask(fileNames, true, dataPort, receptionDirectory);
 				startFileTranferTask();
 			} catch (NumberFormatException e) {
@@ -54,7 +54,7 @@ public class DataTranferService extends JanusService {
 	public void sendObject(Object object) {
 		if (objectTransferTask == null) {
 			try {
-				int dataPort = Integer.parseInt(networkApp.getProperties("dataPort"));
+				int dataPort = Integer.parseInt(networkApp.getProperties("server.ports.data"));
 				objectTransferTask = new ObjectTransferTask(dataPort);
 				startObjectTranferTask();
 			} catch (NumberFormatException e) {
@@ -79,8 +79,8 @@ public class DataTranferService extends JanusService {
 	public void receiveFiles(String[] fileNames) {
 		if (fileTransfertTask == null) {
 			try {
-				int dataPort = Integer.parseInt(networkApp.getProperties("dataPort"));
-				String receptionDirectory = networkApp.getProperties("receptionDirectory");
+				int dataPort = Integer.parseInt(networkApp.getProperties("server.ports.data"));
+				String receptionDirectory = networkApp.getProperties("server.directories.files");
 				fileTransfertTask = new FileTransferTask(fileNames, false, dataPort, receptionDirectory);
 				startFileTranferTask();
 			} catch (NumberFormatException e) {
