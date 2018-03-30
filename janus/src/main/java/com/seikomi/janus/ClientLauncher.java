@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.seikomi.janus.net.JanusClient;
-import com.seikomi.janus.net.properties.JanusClientProperties;
+import com.seikomi.janus.net.properties.JanusProperties;
 
 /**
  * Main class of Janus client.
@@ -26,18 +26,19 @@ public class ClientLauncher implements Observer {
 	private ClientLauncher() {
 		Path propertiesFilePah = Paths.get("client.properties");
 		try {
-			JanusClientProperties clientProperties = new JanusClientProperties(propertiesFilePah);
+			JanusProperties clientProperties = new JanusProperties(propertiesFilePah);
 			client = new JanusClient(clientProperties);
 			client.start();
-			LOGGER.info("Janus client started and connecting to the port " + client.getCommandPort() + " for commands");
+			LOGGER.info("Janus client started and connecting to the port {} for commands",
+					client.getProperties("server.ports.command"));
 
 			scanner = new Scanner(System.in);
-			
+
 			String command;
 			do {
 				command = scanner.nextLine();
 				client.executeCommand(command);
-			} while(!"#EXIT".equals(command));
+			} while (!"#EXIT".equals(command));
 
 		} catch (IOException e) {
 			LOGGER.error("An unknown error occurs during the reading of Janus client properties file", e);

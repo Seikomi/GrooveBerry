@@ -10,12 +10,12 @@ package com.seikomi.janus.net.properties;
  *
  */
 public enum JanusDefaultProperties {
-	/** Command port property representation : {@code commandPort=3008} */
-	COMMAND_PORT("commandPort", "3008"),
-	/** Data port property representation : {@code dataPort=3009} */
-	DATA_PORT("dataPort", "3009"),
-	/** Reception directory for uploaded files : {@code receptionDirectory=files/} */
-	RECEPTION_DIRECTORY("receptionDirectory", "files/");
+	/** Command port property representation : {@code server.ports.command=3008} */
+	COMMAND_PORT("server.ports.command", "3008"),
+	/** Data port property representation : {@code server.ports.data=3009} */
+	DATA_PORT("server.ports.data", "3009"),
+	/** Reception directory for uploaded files : {@code server.directories.files=files/} */
+	RECEPTION_DIRECTORY("server.directories.files", "files/");
 
 	private String propertyName;
 	private String propertyValue;

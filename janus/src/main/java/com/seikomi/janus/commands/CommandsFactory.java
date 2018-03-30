@@ -50,16 +50,18 @@ public class CommandsFactory {
 		String[] commandResult = null;
 
 		StringTokenizer stringTokenizer = new StringTokenizer(commandString);
-		String commandHeader = stringTokenizer.nextToken();
-		if (commands.containsKey(commandHeader)) {
-			if (stringTokenizer.hasMoreTokens()) {
-				String[] args = new String[stringTokenizer.countTokens()];
-				for (int i = 0; i < args.length; i++) {
-					args[i] = stringTokenizer.nextToken();
+		if (stringTokenizer.hasMoreTokens()) {
+			String commandHeader = stringTokenizer.nextToken();
+			if (commands.containsKey(commandHeader)) {
+				if (stringTokenizer.hasMoreTokens()) {
+					String[] args = new String[stringTokenizer.countTokens()];
+					for (int i = 0; i < args.length; i++) {
+						args[i] = stringTokenizer.nextToken();
+					}
+					commandResult = commands.get(commandHeader).apply(args);
+				} else {
+					commandResult = commands.get(commandHeader).apply(null);
 				}
-				commandResult = commands.get(commandHeader).apply(args);
-			} else {
-				commandResult = commands.get(commandHeader).apply(null);
 			}
 		}
 

@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
-import org.h2.server.web.DbStarter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

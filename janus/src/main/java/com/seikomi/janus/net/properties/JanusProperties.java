@@ -125,35 +125,12 @@ public class JanusProperties {
 	}
 
 	/**
-	 * Gets the data port set in the properties file.
-	 * 
-	 * @return the data port
-	 */
-	public int getDataPort() {
-		return Integer.parseInt(properties.getProperty(JanusDefaultProperties.DATA_PORT.getPropertyName()));
-
-	}
-
-	/**
-	 * Gets the command port set in the properties file.
-	 * 
-	 * @return the command port
-	 */
-	public int getCommandPort() {
-		return Integer.parseInt(properties.getProperty(JanusDefaultProperties.COMMAND_PORT.getPropertyName()));
-	}
-
-	/**
 	 * Gets the properties file
 	 * 
 	 * @return the properties file
 	 */
 	public Properties getProperties() {
 		return properties;
-	}
-
-	public String getReceptionDirectory() {
-		return properties.getProperty(JanusDefaultProperties.RECEPTION_DIRECTORY.getPropertyName());
 	}
 
 }

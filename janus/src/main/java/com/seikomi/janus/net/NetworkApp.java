@@ -27,5 +27,4 @@ public interface NetworkApp {
 	public abstract void stop();
 	
 	public abstract String getProperties(String propertieName);
-
 }

@@ -8,13 +8,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Observer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.seikomi.janus.net.properties.JanusClientProperties;
+import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.net.tasks.AskConnectionTask;
 import com.seikomi.janus.utils.Utils;
 
@@ -29,8 +29,12 @@ public class JanusClient implements NetworkApp {
 
 	private static final int BUFFER_SIZE = 1024;
 
-	private JanusClientProperties clientProperties;
+	private JanusProperties clientProperties;
 	private AskConnectionTask askConnectionTask;
+
+	private Integer commandPort;
+	private Integer dataPort;
+	private Path fileDirectory;
 
 	/**
 	 * Create a new instance of Janus client and configure it with the
@@ -39,8 +43,11 @@ public class JanusClient implements NetworkApp {
 	 * @param clientProperties
 	 *            the client {@code .properties} file
 	 */
-	public JanusClient(JanusClientProperties clientProperties) {
+	public JanusClient(JanusProperties clientProperties) {
 		this.clientProperties = clientProperties;
+		this.commandPort = Utils.convertStringToInt(getProperties("server.ports.command"));
+		this.dataPort = Utils.convertStringToInt(getProperties("server.ports.data"));
+		this.fileDirectory = Utils.transformStringPath(getProperties("server.directories.files"));
 	}
 
 	/**
@@ -48,12 +55,12 @@ public class JanusClient implements NetworkApp {
 	 */
 	@Override
 	public void start() {
-		askConnectionTask = new AskConnectionTask(clientProperties.getCommandPort());
+		askConnectionTask = new AskConnectionTask(commandPort);
 
 		Thread askConnectionThread = new Thread(askConnectionTask, "AskConnectionThread");
 		askConnectionThread.start();
 
-		LOGGER.debug("Janus client start on port " + getCommandPort() + " for command. ");
+		LOGGER.debug("Janus client start on port {} for command", commandPort);
 	}
 
 	/**
@@ -82,15 +89,6 @@ public class JanusClient implements NetworkApp {
 		}
 	}
 
-	/**
-	 * Gets the command port in the client properties files.
-	 * 
-	 * @return the command port
-	 */
-	public int getCommandPort() {
-		return clientProperties.getCommandPort();
-	}
-
 	public void executeCommand(String command) {
 		try {
 			DataOutputStream out = new DataOutputStream(askConnectionTask.getOutputStream());
@@ -114,11 +112,11 @@ public class JanusClient implements NetworkApp {
 	}
 
 	private void downloadLicenceFile() throws IOException {
-		try (Socket dataSocket = new Socket("localhost", clientProperties.getDataPort())) {
+		try (Socket dataSocket = new Socket("localhost", dataPort)) {
 			boolean isConnected = dataSocket.isConnected() && dataSocket.isBound();
 			if (isConnected) {
 				BufferedInputStream in = new BufferedInputStream(dataSocket.getInputStream());
-				File file = new File(clientProperties.getReceptionDirectory() + "\\LICENSE");
+				File file = new File(fileDirectory + "/" + "LICENSE");
 
 				try (final BufferedOutputStream fileOutputStream = new BufferedOutputStream(new FileOutputStream(file),
 						BUFFER_SIZE)) {
@@ -152,7 +150,7 @@ public class JanusClient implements NetworkApp {
 	}
 
 	private void uploadLicenceFile() throws IOException {
-		try (Socket dataSocket = new Socket("localhost", clientProperties.getDataPort())) {
+		try (Socket dataSocket = new Socket("localhost", dataPort)) {
 			boolean isConnected = dataSocket.isConnected() && dataSocket.isBound();
 			if (isConnected) {
 

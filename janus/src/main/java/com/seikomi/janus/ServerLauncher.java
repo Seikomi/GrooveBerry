@@ -22,7 +22,7 @@ public class ServerLauncher {
 
 	public ServerLauncher() {
 		Path propertiesFilePath = Paths.get("server.properties");
-		
+
 		try {
 			JanusProperties serverProperties = new JanusProperties(propertiesFilePath);
 			server = new JanusServer(serverProperties) {
@@ -31,30 +31,14 @@ public class ServerLauncher {
 				protected void loadContext() {
 					// Nothing to load
 				}
-				
+
 			};
 			server.start();
-			LOGGER.info("Janus server started and listening on ports : " + serverProperties.getCommandPort()
-					+ " for commands and " + serverProperties.getDataPort() + " for data");
+			LOGGER.info("Janus server started and listening on ports : {} for commands and {} for data",
+					server.getProperties("server.ports.command"), server.getProperties("server.ports.data"));
 		} catch (IOException e) {
 			LOGGER.error("An unknown error occurs during the reading of Janus server properties file", e);
 		}
-		
-//		/*************************************************************
-//		 * Functional test to up the coverage without Thread.sleep() * 
-//		 *************************************************************/
-//		
-//		// TODO must be deleted for release
-//		try {
-//			client = new JanusClient(new JanusClientProperties(propertiesFilePah));
-//			client.start();
-//			LOGGER.info("Janus client started and ask connection on ports " + client.getCommandPort()
-//					+ " to send commands");
-//		} catch (IOException e) {
-//			LOGGER.error("An unknown error occurs during the reading of Janus client properties file", e);
-//		}
-//		
-//		client.addObserver(this);
 	}
 
 	/**
