@@ -1,18 +1,19 @@
 package com.seikomi.grooveberry;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Observable;
 import java.util.Observer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.seikomi.grooveberry.properties.GrooveberryClientProperties;
 import com.seikomi.janus.net.JanusClient;
 import com.seikomi.janus.net.properties.JanusProperties;
+import com.seikomi.janus.utils.Utils;
 
 @Scope(value = "singleton")
 @Component
@@ -22,10 +23,10 @@ public class GrooveberryClient implements Observer {
 	private JanusClient client;
 	private boolean lock;
 	private String response;
-
-	public GrooveberryClient() throws IOException {
-		Path propertiePath = Paths.get("C:\\Users\\Nicolas\\git\\GrooveBerry\\janus\\client.properties");
-		JanusProperties janusClientProperties = new JanusProperties(propertiePath);
+	
+	@Autowired
+	public GrooveberryClient(GrooveberryClientProperties clientProperties) throws IOException {
+		JanusProperties janusClientProperties = new JanusProperties(Utils.transformStringPath(clientProperties.getProperties()));
 		this.client = new JanusClient(janusClientProperties);
 		this.client.addObserver(this);
 		this.client.start();

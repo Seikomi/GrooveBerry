@@ -22,14 +22,15 @@ import com.seikomi.grooveberry.bo.SongTag;
 public class SongDAO extends DAO<Song> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SongDAO.class);
 
-	private static final String SQL_QUERY_FIND_SONG = "SELECT path, songTagId FROM Song WHERE songId = ?";
-	private static final String SQL_QUERY_FIND_ALL_SONGS = "SELECT * FROM Song";
-	private static final String SQL_QUERY_CREATE_SONG = "INSERT INTO Song(path, songTagId) VALUES (?, ?)";
-	private static final String SQL_QUERY_UPDATE_SONG = "UPDATE Song SET path = ?, songTagId = ? WHERE songId = ?";
-	private static final String SQL_QUERY_DELETE_SONG = "DELETE FROM Song WHERE songId = ?";
+	private static final String SQL_QUERY_FIND_SONG = "SELECT path, song_tag_song_tag_id FROM song WHERE song_id = ?";
+	private static final String SQL_QUERY_FIND_ALL_SONGS = "SELECT * FROM song";
+	private static final String SQL_QUERY_CREATE_SONG = "INSERT INTO song(path, song_tag_song_tag_id) VALUES (?, ?)";
+	private static final String SQL_QUERY_UPDATE_SONG = "UPDATE song SET path = ?, song_tag_song_tag_id = ? WHERE song_id = ?";
+	private static final String SQL_QUERY_DELETE_SONG = "DELETE FROM song WHERE song_id = ?";
 
-	private static final String SQL_QUERY_FIND_SONGS_BY_PLAYLIST_ID = "SELECT * FROM Song WHERE songId IN (SELECT songId FROM PlaylistSong WHERE playlistId = ?)";
-
+	private static final String SQL_QUERY_FIND_SONGS_BY_PLAYLIST_ID = "SELECT * FROM song WHERE song_id IN (SELECT song_id FROM playlist_songs WHERE playlist_id = ?)";
+	private static final String SQL_QUERY_FIND_SONGS_BY_PATH = "SELECT * FROM song WHERE path = ?";
+	
 	private DAO<SongTag> songTagDAO;
 
 	/**
@@ -51,11 +52,37 @@ public class SongDAO extends DAO<Song> {
 		}
 		return song;
 	}
+	
+	public Song findByPath(String path) {
+		Song song = null;
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_FIND_SONGS_BY_PATH)) {
+			preparedStatement.setString(1, path);
+
+			try (ResultSet result = preparedStatement.executeQuery()) {
+				LOGGER.trace(SQL_TRACE_FORMAT, preparedStatement);
+				if (result.first()) {
+					song = new Song();
+					song.setSongId(result.getLong("song_id"));
+					song.setPath(result.getString("path"));
+					
+					SongTag songTag = findAssociatedSongTag(result);
+					if (songTag !=null) {
+						song.setSongTag(songTag);
+					}				
+				} else {
+					LOGGER.trace(SQL_TRACE_FORMAT, "empty ResultSet");
+				}
+			}
+		} catch (SQLException e) {
+			LOGGER.error("Unable to find the rsong object with the path = {}", path, e);
+		}
+		return song;
+	}
 
 	@Override
 	public Song create(Song song) {
 		Song songCreated = null;
-		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_CREATE_SONG)) {
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_CREATE_SONG, Statement.RETURN_GENERATED_KEYS)) {
 			preparedStatement.setString(1, song.getPath());
 			if (song.getSongTag() != null) {
 				SongTag songtagToCreate = song.getSongTag();
@@ -220,7 +247,7 @@ public class SongDAO extends DAO<Song> {
 		List<Song> songs = new ArrayList<>();
 		while (result.next()) {
 			Song song = new Song();
-			song.setSongId(result.getLong("songId"));
+			song.setSongId(result.getLong("song_id"));
 			song.setPath(result.getString("path"));
 			
 			SongTag songTag = findAssociatedSongTag(result);
@@ -247,10 +274,10 @@ public class SongDAO extends DAO<Song> {
 	 *             occurs or this method is called on a closed result set
 	 */
 	private SongTag findAssociatedSongTag(ResultSet result) throws SQLException {
-		if (result.getInt("songTagId") == 0) {
+		if (result.getInt("song_tag_song_tag_id") == 0) {
 			return null;
 		}
-		return songTagDAO.find(result.getInt("songTagId"));
+		return songTagDAO.find(result.getInt("song_tag_song_tag_id"));
 	}
 
 }

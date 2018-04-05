@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.seikomi.grooveberry.GrooveberryServer;
 import com.seikomi.grooveberry.bo.Song;
+import com.seikomi.grooveberry.dao.SongDAO;
 import com.seikomi.janus.net.JanusServer;
 import com.seikomi.janus.services.DataTranferService;
 import com.seikomi.janus.services.Locator;
@@ -50,6 +51,10 @@ public class YoutubeTransfertService extends DataTranferService {
 					if (fileName != null) {
 						Song addedSong = new Song();
 						addedSong.setPath(fileName);
+						
+						SongDAO songDAO = new SongDAO();
+						songDAO.create(addedSong);
+						
 						List<Song> songsToAdd = new ArrayList<>();
 						songsToAdd.add(addedSong);
 						Locator.getService(ReadingQueueService.class, networkApp).addToReadingQueue(songsToAdd);

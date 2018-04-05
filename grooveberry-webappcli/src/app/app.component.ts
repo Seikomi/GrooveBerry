@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {CommandService} from './command.service';
+import {Stomp} from 'stompjs';
+import {SockJS} from 'sockjs-client';
 
 @Component({
   selector: 'app-root',
@@ -7,31 +8,36 @@ import {CommandService} from './command.service';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
+
   title = 'GrooveBerry';
   imagePath = '/assets/img/logo.png';
   imageSize = 250;
 
+  private serverUrl = 'http://localhost:8080/grooveberry/socket';
+  private stompClient;
+
+
   ngOnInit(): void {
-    throw new Error('Method not implemented.');
+    this.initializeWebSocketConection();
   }
 
-  constructor(private commandService: CommandService) {
+  constructor() {
 
   }
 
-  play(): void {
-    this.commandService.play().subscribe();
+  initializeWebSocketConection(): any {
+    const webSocket = new SockJS(this.serverUrl);
+    this.stompClient = Stomp.over(webSocket);
+    this.stompClient.connect({}, function(frame) {
+      console.log('Connected: ' + frame);
+      this.stompClient.subscribe('/events', (message) => console.log(message));
+    });
+
   }
 
-  pause(): void {
-    this.commandService.pause().subscribe();
+  sendMessage(message) {
+    this.stompClient.send('/grooveberry/send/message', {}, message);
+    console.log(message);
   }
 
-  next(): void {
-    this.commandService.next().subscribe();
-  }
-
-  prev(): void {
-    this.commandService.prev().subscribe();
-  }
 }

@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.seikomi.grooveberry.dao.ReadingQueueDAO;
+
 /**
  * La classe <code>ReadingQueue</code> permet la gestion d'un fil de lecture
  * de maniére automatisée en gérant les operations suivantes :
@@ -32,6 +34,8 @@ public final class ReadingQueue {
 	private int currentTrackIndex;
 	private boolean randomised;
 	
+	private ReadingQueueDAO readingQueueDAO;
+	
 	/**
 	 * Construire un fil de lecture vide.
 	 *
@@ -40,6 +44,7 @@ public final class ReadingQueue {
 		this.queue = new LinkedList<>();
 		this.currentTrackIndex = -1;
         this.randomised = false; // active les playlist aleatoire
+        this.readingQueueDAO = new ReadingQueueDAO();
 	}
 	
 	public static synchronized ReadingQueue getInstance() {
@@ -82,6 +87,7 @@ public final class ReadingQueue {
 	public void addLast(Song track){
 		if (this.isEmpty()) {
 			this.currentTrack = new AudioFile(track.getPath());
+			readingQueueDAO.update();
 			this.currentTrackIndex = 0;
 		}
 		this.queue.add(track);
@@ -99,6 +105,7 @@ public final class ReadingQueue {
 	public void addAt(int index, Song track) {
 		if (this.isEmpty()) {
 			this.currentTrack = new AudioFile(track.getPath());
+			readingQueueDAO.update();
 			this.currentTrackIndex = 0;
 		}
 		if (index <= this.currentTrackIndex && !this.isEmpty()) {
@@ -116,6 +123,7 @@ public final class ReadingQueue {
 	public void addList(List<Song> playlist) {
 		if (this.isEmpty()) {
 			this.currentTrack = new AudioFile(playlist.get(0).getPath());
+			readingQueueDAO.update();
 			this.currentTrackIndex = 0;
 		}
 		this.queue.addAll(playlist);
@@ -147,8 +155,10 @@ public final class ReadingQueue {
 			this.currentTrack.deleteObservers();
 			if (!this.queue.getLast().getPath().equals(this.currentTrack.getPath())) {				
 				this.currentTrack = new AudioFile(this.queue.get(currentTrackIndex + 1).getPath());
+				readingQueueDAO.update();
 			} else {
 				this.currentTrack = null;
+				// DAO remove
 				this.currentTrackIndex = -1;
 			}
 		}
@@ -221,6 +231,7 @@ public final class ReadingQueue {
 	public void setCurrentTrackPostion(int index) {
 		this.currentTrackIndex = index;
 		this.currentTrack = new AudioFile(this.queue.get(index).getPath());
+		readingQueueDAO.update();
 	}
 	
 	/**

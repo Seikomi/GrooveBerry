@@ -3,6 +3,7 @@ package com.seikomi.grooveberry.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -20,10 +21,10 @@ import com.seikomi.grooveberry.bo.Song;
 public class PlaylistDAO extends DAO<Playlist> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PlaylistDAO.class);
 
-	private static final String SQL_QUERY_FIND_PLAYLIST = "SELECT name FROM Playlist WHERE playlistId = ?";
-	private static final String SQL_QUERY_CREATE_PLAYLIST = "INSERT INTO Playlist(name) VALUES(?)";
-	private static final String SQL_QUERY_UPDATE_PLAYLIST = "UPDATE Playlist SET name = ? WHERE playlistId = ?";
-	private static final String SQL_QUERY_DELETE_PLAYLIST = "DELETE FROM Playlist WHERE playlistId = ?";
+	private static final String SQL_QUERY_FIND_PLAYLIST = "SELECT name FROM playlist WHERE playlist_id = ?";
+	private static final String SQL_QUERY_CREATE_PLAYLIST = "INSERT INTO playlist(name) VALUES(?)";
+	private static final String SQL_QUERY_UPDATE_PLAYLIST = "UPDATE playlist SET name = ? WHERE playlist_id = ?";
+	private static final String SQL_QUERY_DELETE_PLAYLIST = "DELETE FROM playlist WHERE playlist_id = ?";
 
 	private SongDAO songDAO;
 	private PlaylistSongDAO playlistSongDAO;
@@ -52,7 +53,8 @@ public class PlaylistDAO extends DAO<Playlist> {
 	@Override
 	public Playlist create(Playlist playlist) {
 		Playlist playlistCreated = null;
-		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_CREATE_PLAYLIST)) {
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_CREATE_PLAYLIST,
+				Statement.RETURN_GENERATED_KEYS)) {
 			preparedStatement.setString(1, playlist.getName());
 
 			preparedStatement.executeUpdate();
@@ -118,8 +120,8 @@ public class PlaylistDAO extends DAO<Playlist> {
 	}
 
 	/**
-	 * Executes the found playlist query and creates the playlist object according to
-	 * the database response.
+	 * Executes the found playlist query and creates the playlist object according
+	 * to the database response.
 	 * 
 	 * @param playlistId
 	 *            the playlist id
@@ -165,7 +167,8 @@ public class PlaylistDAO extends DAO<Playlist> {
 	 * changes between the playlist update and the playlist in database and perform
 	 * addition/suppression.
 	 * 
-	 * @param playlist the playlist update
+	 * @param playlist
+	 *            the playlist update
 	 */
 	private void updatePlaylistSongs(Playlist playlist) {
 		List<Song> songsToUpdate = playlist.getSongs();

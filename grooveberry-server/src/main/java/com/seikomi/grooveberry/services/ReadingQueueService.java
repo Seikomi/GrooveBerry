@@ -13,6 +13,7 @@ import com.seikomi.janus.services.JanusService;
 import com.seikomi.grooveberry.bo.AudioFile;
 import com.seikomi.grooveberry.bo.ReadingQueue;
 import com.seikomi.grooveberry.bo.Song;
+import com.seikomi.grooveberry.dao.ReadingQueueDAO;
 import com.seikomi.grooveberry.utils.AudioUtility;
 
 public class ReadingQueueService extends JanusService implements Observer {
@@ -202,6 +203,9 @@ public class ReadingQueueService extends JanusService implements Observer {
 		endCurrentTrack(previousTrackFlags);
 		changeCurrentTrack(forward);
 		changeCurrentTrackStatus(previousTrackFlags);
+		
+		ReadingQueueDAO readingQueueDAO = new ReadingQueueDAO();
+		readingQueueDAO.update();
 	}
 
 	/**

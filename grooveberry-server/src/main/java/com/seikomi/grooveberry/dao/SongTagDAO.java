@@ -3,6 +3,7 @@ package com.seikomi.grooveberry.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 
 import org.slf4j.Logger;
@@ -19,10 +20,10 @@ import com.seikomi.grooveberry.bo.SongTag;
 public class SongTagDAO extends DAO<SongTag> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SongTagDAO.class);
 
-	private static final String SQL_QUERY_FIND_SONG_TAG = "SELECT title, artistName, albumName, year, comment, trackNumber, genreId FROM SongTag WHERE songTagId = ?";
-	private static final String SQL_QUERY_CREATE_SONG_TAG = "INSERT INTO SongTag(title, artistName, albumName, year, comment, trackNumber, genreId) VALUES (?, ?, ?, ?, ?, ?, ?)";
-	private static final String SQL_QUERY_UPDATE_SONG_TAG = "UPDATE SongTag SET title = ?, artistName = ?, albumName = ?, year = ?, comment = ?, trackNumber = ?, genreId = ? WHERE songTagId = ?";
-	private static final String SQL_QUERY_DELETE_SONG_TAG = "DELETE FROM SongTag WHERE songTagId = ?";
+	private static final String SQL_QUERY_FIND_SONG_TAG = "SELECT title, artist_name, album_name, year, comment, track_number, genre_id FROM song_tag WHERE song_tag_id = ?";
+	private static final String SQL_QUERY_CREATE_SONG_TAG = "INSERT INTO song_tag(title, artist_name, album_name, year, comment, track_number, genre_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+	private static final String SQL_QUERY_UPDATE_SONG_TAG = "UPDATE song_tag SET title = ?, artist_name = ?, album_name = ?, year = ?, comment = ?, track_number = ?, genre_id = ? WHERE song_tag_id = ?";
+	private static final String SQL_QUERY_DELETE_SONG_TAG = "DELETE FROM song_tag WHERE song_tag_id = ?";
 
 	@Override
 	public SongTag find(long songTagId) {
@@ -46,12 +47,12 @@ public class SongTagDAO extends DAO<SongTag> {
 				songTag = new SongTag();
 				songTag.setSongTagId(songTagId);
 				songTag.setTitle(result.getString("title"));
-				songTag.setArtistName(result.getString("artistName"));
-				songTag.setAlbumName(result.getString("albumName"));
+				songTag.setArtistName(result.getString("artist_name"));
+				songTag.setAlbumName(result.getString("album_name"));
 				songTag.setYear(result.getInt("year"));
 				songTag.setComment(result.getString("comment"));
-				songTag.setTrackNumber(result.getInt("trackNumber"));
-				int genreId = result.getInt("genreId");
+				songTag.setTrackNumber(result.getInt("track_number"));
+				int genreId = result.getInt("genre_id");
 				songTag.setGenre(Genre.getGenre(genreId));
 			} else {
 				LOGGER.trace(SQL_TRACE_FORMAT, "no result");
@@ -63,7 +64,7 @@ public class SongTagDAO extends DAO<SongTag> {
 	@Override
 	public SongTag create(SongTag songTag) {
 		SongTag songTagCreated = null;
-		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_CREATE_SONG_TAG)) {
+		try (PreparedStatement preparedStatement = connection.prepareStatement(SQL_QUERY_CREATE_SONG_TAG, Statement.RETURN_GENERATED_KEYS)) {
 			preparedStatement.setString(1, songTag.getTitle());
 			preparedStatement.setString(2, songTag.getArtistName());
 			preparedStatement.setString(3, songTag.getAlbumName());

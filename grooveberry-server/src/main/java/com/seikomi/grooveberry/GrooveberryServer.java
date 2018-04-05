@@ -1,12 +1,13 @@
 package com.seikomi.grooveberry;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -24,11 +25,14 @@ import com.seikomi.grooveberry.commands.VolumeUp;
 import com.seikomi.grooveberry.commands.WhatIsTheReadingQueue;
 import com.seikomi.grooveberry.commands.WhatIsThisSong;
 import com.seikomi.grooveberry.commands.YoutubeDownload;
+import com.seikomi.grooveberry.dao.ReadingQueueDAO;
 import com.seikomi.grooveberry.dao.SongDAO;
 import com.seikomi.grooveberry.database.ConnectionH2Database;
+import com.seikomi.grooveberry.database.ConnectionMySQLDatabase;
 import com.seikomi.grooveberry.services.ReadingQueueService;
 import com.seikomi.grooveberry.services.YoutubeTransfertService;
 import com.seikomi.grooveberry.utils.AudioFileDirectoryScanner;
+import com.seikomi.grooveberry.utils.ScriptRunner;
 import com.seikomi.janus.commands.CommandsFactory;
 import com.seikomi.janus.net.JanusServer;
 import com.seikomi.janus.net.properties.JanusProperties;
@@ -55,14 +59,8 @@ public class GrooveberryServer extends JanusServer {
 	@Override
 	public void stop() {
 		Connection connection = ConnectionH2Database.getConnection();
-		try (Statement statement = connection.createStatement()) {
-			ClassLoader classLoader = getClass().getClassLoader();
-			File initDatabaseFile = new File(classLoader.getResource("sql/dropTables.sql").getFile());
-			statement.executeUpdate(String.format("RUNSCRIPT FROM '%s'", initDatabaseFile));
-		} catch (SQLException e) {
-			LOGGER.error("Unable to build the database", e);
-		}
-
+		runScript(connection, "sql/dropTables.sql");
+		
 		ConnectionH2Database.closeConnection();
 		ReadingQueue.getInstance().clearQueue();
 		super.stop();
@@ -70,6 +68,11 @@ public class GrooveberryServer extends JanusServer {
 
 	@Override
 	protected void loadContext() {
+		String url = getProperties("database.url");
+		String user = getProperties("database.user");
+		String password = getProperties("database.password");
+		ConnectionMySQLDatabase.getConnection(url, user, password);
+		
 		CommandsFactory.addCommand(new Play(), "#PLAY", this);
 		CommandsFactory.addCommand(new Next(), "#NEXT", this);
 		CommandsFactory.addCommand(new Prev(), "#PREV", this);
@@ -93,16 +96,6 @@ public class GrooveberryServer extends JanusServer {
 		Path serverLibraryDirectoryPath = Utils.transformStringPath(getProperties("server.directories.library"));
 		Path serverPropertiesPath = Utils
 				.transformStringPath(getProperties("server.directories.root") + "grooveberry.properties");
-		
-//		try {
-//			GrooveberryPropertiesFileGenerator.createServerPropertiesFile(serverPropertiesPath);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
-
-
 
 		File mainDirectory = mainDirectoryPath.toFile();
 		File serverProperties = serverPropertiesPath.toFile();
@@ -132,17 +125,20 @@ public class GrooveberryServer extends JanusServer {
 	}
 
 	private void initDatabase() {
-		String url = getProperties("database.url");
-		String user = getProperties("database.user");
-		String password = getProperties("database.password");
-		Connection connection = ConnectionH2Database.getConnection(url, user, password);
+		
+		Connection connection = ConnectionMySQLDatabase.getConnection();
+		runScript(connection, "sql/init.sql");
+	}
 
-		try (Statement statement = connection.createStatement()) {
+	private void runScript(Connection connection, String filePath) {
+		String file = null;
+		try {
 			ClassLoader classLoader = getClass().getClassLoader();
-			File initDatabaseFile = new File(classLoader.getResource("sql/init.sql").getFile());
-			statement.executeUpdate(String.format("RUNSCRIPT FROM '%s'", initDatabaseFile));
-		} catch (SQLException e) {
-			LOGGER.error("Unable to build the database", e);
+			ScriptRunner runner = new ScriptRunner(connection, false, false);
+			file = classLoader.getResource(filePath).getFile();
+			runner.runScript(new BufferedReader(new FileReader(file)));
+		} catch (IOException | SQLException e) {
+			LOGGER.error("Failed to execute the SQL script file {}", file, e);
 		}
 	}
 

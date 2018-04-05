@@ -1,0 +1,10 @@
+<div align="center">
+	<label>Upload music from Youtube : <input type="text" #urlInput/></label>
+	<button (click)="sendCommand('#Y_DOWNLOAD ' + urlInput.value)">Submit</button>
+</div>
+<div align="center">
+	<button (click)="sendCommand('#PLAY')">Play</button>
+	<button (click)="sendCommand('#PAUSE')">Pause</button>
+	<button (click)="sendCommand('#NEXT')">Next</button>
+	<button (click)="sendCommand('#PREV')">Prev</button>
+</div>

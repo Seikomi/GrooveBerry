@@ -14,5 +14,5 @@ Note : Use a JDK rather than a JRE to ensure the maven build
 
 * First launch the grooveberry-server, by running the following java file /grooveberry-server/src/main/java/com/seikomi/grooveberry/Launcher.java
 * Then launch the grooveberry-webapp spring boot application, by running the following java file /grooveberry-webapp/src/main/java/com/seikomi/grooveberry/GrooveberryWebappApplication.java
-* And finally launch the grooveberry-webappcli angular application by running npm start shell command in the grooveberry-webappcli main directory
+* And finally launch the grooveberry-webappcli angular application by running npm start  in the eclipse view terminal+ on the project grooveberry-webappcli
 * You can access the web app at http://localhost:4200/

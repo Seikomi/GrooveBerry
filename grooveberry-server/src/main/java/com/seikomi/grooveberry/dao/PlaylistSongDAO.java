@@ -12,9 +12,9 @@ import com.seikomi.grooveberry.bo.PlaylistSong;
 public class PlaylistSongDAO {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PlaylistSongDAO.class);
 
-	private static final String SQL_QUERY_FIND_PLAYLIST_SONG = "SELECT * FROM PlaylistSong WHERE playlistId = ? AND songId = ?";
-	private static final String SQL_QUERY_CREATE_PLAYLIST_SONG = "INSERT INTO PlaylistSong VALUES(?, ?)";
-	private static final String SQL_QUERY_DELETE_PLAYLIST_SONG = "DELETE FROM PlaylistSong WHERE playlistId = ? AND songId = ?";
+	private static final String SQL_QUERY_FIND_PLAYLIST_SONG = "SELECT * FROM playlist_songs WHERE playlist_playlist_id = ? AND songs_song_id = ?";
+	private static final String SQL_QUERY_CREATE_PLAYLIST_SONG = "INSERT INTO playlist_songs VALUES(?, ?)";
+	private static final String SQL_QUERY_DELETE_PLAYLIST_SONG = "DELETE FROM playlist_songs WHERE playlist_playlist_id = ? AND songs_song_id = ?";
 
 	public PlaylistSong find(long playlistId, long songId) {
 		PlaylistSong playlistSong = null;
@@ -36,8 +36,8 @@ public class PlaylistSongDAO {
 			LOGGER.trace(DAO.SQL_TRACE_FORMAT, preparedStatement);
 			if (result.first()) {
 				playlistSong = new PlaylistSong();
-				playlistSong.setPlaylistId(result.getLong("playlistId"));
-				playlistSong.setSongId(result.getLong("songId"));
+				playlistSong.setPlaylistId(result.getLong("playlist_playlist_id"));
+				playlistSong.setSongId(result.getLong("songs_song_id"));
 			} else {
 				LOGGER.trace(DAO.SQL_TRACE_FORMAT, "no result");
 			}
