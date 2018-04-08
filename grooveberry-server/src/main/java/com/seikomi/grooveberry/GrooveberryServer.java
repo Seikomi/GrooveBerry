@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,11 +37,12 @@ import com.seikomi.grooveberry.utils.AudioFileDirectoryScanner;
 import com.seikomi.grooveberry.utils.ScriptRunner;
 import com.seikomi.janus.commands.CommandsFactory;
 import com.seikomi.janus.net.JanusServer;
+import com.seikomi.janus.net.dispatcher.EventsDispatcher;
 import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.services.Locator;
 import com.seikomi.janus.utils.Utils;
 
-public class GrooveberryServer extends JanusServer {
+public class GrooveberryServer extends JanusServer implements Observer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GrooveberryServer.class);
 	public static final String USER_HOME_PATH = System.getProperty("user.home");
 
@@ -60,7 +63,7 @@ public class GrooveberryServer extends JanusServer {
 	public void stop() {
 		Connection connection = ConnectionH2Database.getConnection();
 		runScript(connection, "sql/dropTables.sql");
-		
+
 		ConnectionH2Database.closeConnection();
 		ReadingQueue.getInstance().clearQueue();
 		super.stop();
@@ -72,7 +75,7 @@ public class GrooveberryServer extends JanusServer {
 		String user = getProperties("database.user");
 		String password = getProperties("database.password");
 		ConnectionMySQLDatabase.getConnection(url, user, password);
-		
+
 		CommandsFactory.addCommand(new Play(), "#PLAY", this);
 		CommandsFactory.addCommand(new Next(), "#NEXT", this);
 		CommandsFactory.addCommand(new Prev(), "#PREV", this);
@@ -86,6 +89,8 @@ public class GrooveberryServer extends JanusServer {
 
 		Locator.load(new ReadingQueueService(this));
 		Locator.load(new YoutubeTransfertService(this));
+
+		Locator.getService(ReadingQueueService.class, this).addObserver(this);
 	}
 
 	/**
@@ -125,7 +130,7 @@ public class GrooveberryServer extends JanusServer {
 	}
 
 	private void initDatabase() {
-		
+
 		Connection connection = ConnectionMySQLDatabase.getConnection();
 		runScript(connection, "sql/init.sql");
 	}
@@ -175,4 +180,18 @@ public class GrooveberryServer extends JanusServer {
 
 	}
 
+	@Override
+	public void update(Observable o, Object arg) {
+		List<EventsDispatcher> eventsDispatchers = getEventsDispatchers();
+		if (eventsDispatchers != null) {
+			LOGGER.debug("Send incoming events to events dispatchers :");
+			for (EventsDispatcher eventsDispatchTask : eventsDispatchers) {
+				try {
+					eventsDispatchTask.sendEvent();
+				} catch (IOException e) {
+					LOGGER.error("An error occurs during the broadcasting of events", e);
+				}
+			}
+		}
+	}
 }

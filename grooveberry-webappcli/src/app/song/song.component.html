@@ -1,5 +1,8 @@
-<ul class="songs">
-  <li *ngFor="let song of songs">
-    {{song.fileName}}
-  </li>
-</ul>
+<mat-card>
+	<mat-list>
+		<mat-list-item *ngFor="let song of songs">
+			<mat-icon mat-list-icon>music_note</mat-icon>
+			<h4 mat-line>{{song.fileName}}</h4>
+		</mat-list-item>
+	</mat-list>
+</mat-card>

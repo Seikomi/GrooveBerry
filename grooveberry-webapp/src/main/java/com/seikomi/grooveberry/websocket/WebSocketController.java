@@ -1,23 +1,19 @@
 package com.seikomi.grooveberry.websocket;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 @Controller
 public class WebSocketController {
-	
-	private final SimpMessagingTemplate template;
-	
-	@Autowired
-	public WebSocketController(SimpMessagingTemplate template) {
-		this.template = template;
-	}
-	
-	@MessageMapping("/send/message")
-	public void onReceiveMessage(String message) {
-		template.convertAndSend("/events", "TOTO");
-	}
 
+	@Autowired
+    private SimpMessagingTemplate template;
+	
+    public String sendNotification() {
+    	
+        template.convertAndSend("/topic/notification", "TOTO");
+
+        return "Notifications successfully sent to Angular !";
+    }
 }

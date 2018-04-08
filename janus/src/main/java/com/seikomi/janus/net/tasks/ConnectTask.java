@@ -9,6 +9,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.seikomi.janus.net.dispatcher.EventsDispatcher;
+
 /**
  * Janus task that handle all client connection, it is based on one-thread-per-client
  * design. At the instantiation this task create a server socket on command
@@ -23,6 +25,8 @@ public class ConnectTask extends JanusTask {
 
 	private ServerSocket serverCommandSocket;
 	private List<TreatmentTask> treatmentTasks;
+	
+	private List<EventsDispatcher> eventsDispatchTasks;
 
 	private boolean isWaiting = false;
 
@@ -37,7 +41,8 @@ public class ConnectTask extends JanusTask {
 	 */
 	public ConnectTask(int commandPort) throws IOException {
 		this.serverCommandSocket = new ServerSocket(commandPort);
-		treatmentTasks = new ArrayList<>();
+		this.treatmentTasks = new ArrayList<>();
+		this.eventsDispatchTasks = new ArrayList<>();
 	}
 
 	@Override
@@ -64,6 +69,9 @@ public class ConnectTask extends JanusTask {
 			treatmentTasks.add(treatmentTask);
 			Thread treatmentThread = new Thread(treatmentTask, "treatmentThread");
 			treatmentThread.start();
+			
+			EventsDispatcher eventsDispatchTask = new EventsDispatcher(commandSocket);
+			eventsDispatchTasks.add(eventsDispatchTask);
 
 		} catch (IOException e) {
 			LOGGER.error("An error occurs during client connection", e);
@@ -98,6 +106,18 @@ public class ConnectTask extends JanusTask {
 
 	public boolean isWaiting() {
 		return isWaiting;
+	}
+
+	public static Logger getLogger() {
+		return LOGGER;
+	}
+
+	public List<TreatmentTask> getTreatmentTasks() {
+		return treatmentTasks;
+	}
+
+	public List<EventsDispatcher> getEventsDispatchTasks() {
+		return eventsDispatchTasks;
 	}
 	
 	

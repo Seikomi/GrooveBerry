@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 
 import {Song} from '../song';
 import {ReadingQueueService} from '../reading-queue.service';
+import { WebSocketService } from '../web-socket.service';
 
 @Component({
   selector: 'app-reading-queue',
@@ -11,7 +12,15 @@ import {ReadingQueueService} from '../reading-queue.service';
 export class ReadingQueueComponent implements OnInit {
   currentTrack: Song;
 
-  constructor(private readingQueueService: ReadingQueueService) {}
+  constructor(private readingQueueService: ReadingQueueService, private webSocketService: WebSocketService) {
+    const stompClient = this.webSocketService.connect();
+
+    stompClient.connect({}, frame => {
+      stompClient.subscribe('/topic/notification', notifications => {
+        this.getCurrentTrack();
+      });
+    });
+  }
 
   ngOnInit(): void {
     this.getCurrentTrack();

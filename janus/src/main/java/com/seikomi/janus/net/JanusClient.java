@@ -9,8 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.file.Paths;
-import java.util.Observable;
-import java.util.Observer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +23,7 @@ import com.seikomi.janus.utils.Utils;
  * @author Nicolas SYMPHORIEN (nicolas.symphorien@gmail.com)
  *
  */
-public class JanusClient extends Observable implements NetworkApp, Observer {
+public class JanusClient implements NetworkApp {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JanusClient.class);
 
 	private static final int BUFFER_SIZE = 1024;
@@ -52,7 +50,6 @@ public class JanusClient extends Observable implements NetworkApp, Observer {
 		askConnectionTask = new AskConnectionTask(Utils.convertStringToInt(getProperties("server.ports.command")));
 
 		Thread askConnectionThread = new Thread(askConnectionTask, "AskConnectionThread");
-		askConnectionTask.addObserver(this);
 		askConnectionThread.start();
 
 		LOGGER.debug("Janus client start on port " + getProperties("server.ports.command") + " for command. ");
@@ -187,10 +184,11 @@ public class JanusClient extends Observable implements NetworkApp, Observer {
 		return clientProperties.getProperties().getProperty(propertieName, null);
 	}
 
-	@Override
-	public void update(Observable o, Object arg) {
-		setChanged();
-		notifyObservers(arg);
+	public AskConnectionTask getAskConnectionTask() {
+		return askConnectionTask;
 	}
+	
+	
+
 
 }

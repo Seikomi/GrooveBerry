@@ -8,13 +8,13 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.seikomi.janus.net.JanusServer;
-import com.seikomi.janus.services.JanusService;
 import com.seikomi.grooveberry.bo.AudioFile;
 import com.seikomi.grooveberry.bo.ReadingQueue;
 import com.seikomi.grooveberry.bo.Song;
 import com.seikomi.grooveberry.dao.ReadingQueueDAO;
 import com.seikomi.grooveberry.utils.AudioUtility;
+import com.seikomi.janus.net.JanusServer;
+import com.seikomi.janus.services.JanusService;
 
 public class ReadingQueueService extends JanusService implements Observer {
 
@@ -35,12 +35,20 @@ public class ReadingQueueService extends JanusService implements Observer {
 		int trackIndex = readingQueue.getCurrentTrackPosition();
 		if ((trackIndex + 1 < readingQueue.size()) || readingQueue.isRandomised()) {
 			changeTrack(true);
+			readingQueue.getCurrentTrack().addObserver(this);
+			readingQueue.getCurrentTrack().play();
 		} else {
+			TrackFlags previousTrackFlags = new TrackFlags(readingQueue.getCurrentTrack());
+			endCurrentTrack(previousTrackFlags);
 			readingQueue.setCurrentTrackPostion(0);
-		}
-		readingQueue.getCurrentTrack().addObserver(this);
-		readingQueue.getCurrentTrack().play();
+			readingQueue.getCurrentTrack().addObserver(this);
 
+			ReadingQueueDAO readingQueueDAO = new ReadingQueueDAO();
+			readingQueueDAO.update();
+
+			setChanged();
+			notifyObservers();
+		}
 	}
 
 	/**
@@ -108,8 +116,7 @@ public class ReadingQueueService extends JanusService implements Observer {
 	public String whatIsTheReadingQueue() {
 		StringBuilder stringBuilder = new StringBuilder();
 		int position = 0;
-		for (Song audioFile : readingQueue.getAudioFileList()) 
-		{	//Format NOM_FICHIER;bool_isCurrentTrack
+		for (Song audioFile : readingQueue.getAudioFileList()) { // Format NOM_FICHIER;bool_isCurrentTrack
 			stringBuilder.append(audioFile.getFileName());
 			if (readingQueue.getCurrentTrackPosition() == position) {
 				stringBuilder.append(DATA_SEPARATOR + "1");
@@ -147,8 +154,8 @@ public class ReadingQueueService extends JanusService implements Observer {
 	}
 
 	/**
-	 * Changer le morceau selon <code>forward</code>, <code>isRandomised</code>
-	 * et <code>trackFlags</code>.<br/>
+	 * Changer le morceau selon <code>forward</code>, <code>isRandomised</code> et
+	 * <code>trackFlags</code>.<br/>
 	 * 
 	 * @param forward
 	 *            Si <code>forward = true</code> alors passe au morceau suivant,
@@ -203,9 +210,12 @@ public class ReadingQueueService extends JanusService implements Observer {
 		endCurrentTrack(previousTrackFlags);
 		changeCurrentTrack(forward);
 		changeCurrentTrackStatus(previousTrackFlags);
-		
+
 		ReadingQueueDAO readingQueueDAO = new ReadingQueueDAO();
 		readingQueueDAO.update();
+
+		setChanged();
+		notifyObservers();
 	}
 
 	/**
@@ -245,8 +255,12 @@ public class ReadingQueueService extends JanusService implements Observer {
 			String state = (String) arg;
 			if ("EndOfPlay".equals(state)) {
 				endOfPlay();
+				setChanged();
+				notifyObservers();
 			} else if ("StopOfPlay".equals(state)) {
 				stopOfPlay();
+				setChanged();
+				notifyObservers();
 			}
 		}
 
@@ -273,7 +287,8 @@ public class ReadingQueueService extends JanusService implements Observer {
 
 	public void addToReadingQueue(List<Song> audioFileList) {
 		readingQueue.addList(audioFileList);
-
+		setChanged();
+		notifyObservers();
 	}
 
 }
