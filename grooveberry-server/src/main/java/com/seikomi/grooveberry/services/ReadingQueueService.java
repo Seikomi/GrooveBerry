@@ -69,14 +69,20 @@ public class ReadingQueueService extends JanusService implements Observer {
 	 * Activer/désactiver le passage aléatoire à un morceau
 	 */
 	public void play() {
-		readingQueue.getCurrentTrack().deleteObservers();
-		ReadingQueue.getInstance().getCurrentTrack().addObserver(this);
-		readingQueue.getCurrentTrack().play();
+		if (!readingQueue.getCurrentTrack().isPlaying()) {
+			readingQueue.getCurrentTrack().deleteObservers();
+			ReadingQueue.getInstance().getCurrentTrack().addObserver(this);
+			readingQueue.getCurrentTrack().play();
+		} else if (readingQueue.getCurrentTrack().isPaused()) {
+			readingQueue.getCurrentTrack().pause();
+		}
 
 	}
 
 	public void pause() {
-		readingQueue.getCurrentTrack().pause();
+		if (readingQueue.getCurrentTrack().isPlaying()) {
+			readingQueue.getCurrentTrack().pause();
+		}
 
 	}
 
