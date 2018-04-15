@@ -1,0 +1,14 @@
+.title{
+    font-family: 'Roboto'; 
+    font-size: 32px;
+    font-weight: bold;
+}
+
+app-song {
+	display: flex;
+	justify-content: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}

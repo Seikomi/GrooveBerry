@@ -56,6 +56,7 @@ public class AskConnectionTask extends JanusTask {
 	public void loop() {
 		try {
 			String response = in.readUTF();
+			
 			responses.add(response);
 			
 			setChanged();

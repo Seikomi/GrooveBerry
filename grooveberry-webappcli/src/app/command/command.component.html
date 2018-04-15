@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div align="center">
 	<label>Upload music from Youtube : <input type="text" #urlInput/></label>
 	<button (click)="sendCommand('#Y_DOWNLOAD ' + urlInput.value)">Submit</button>
@@ -8,3 +9,30 @@
 	<button (click)="sendCommand('#NEXT')">Next</button>
 	<button (click)="sendCommand('#PREV')">Prev</button>
 </div>
+=======
+<mat-toolbar color="primary">
+	<span>
+		<img width="{{imageSize}}" src="{{imagePath}}" style="z-index: 10;position: relative;">
+	</span>
+	<button mat-icon-button (click)="sendCommand('#PLAY')">
+		<mat-icon>play_arrow</mat-icon>
+	</button>
+	<button mat-icon-button (click)="sendCommand('#PAUSE')">
+		<mat-icon>pause</mat-icon>
+	</button>
+	<button mat-icon-button (click)="sendCommand('#PREV')">
+		<mat-icon>skip_previous</mat-icon>
+	</button>
+	<button mat-icon-button (click)="sendCommand('#NEXT')">
+		<mat-icon>skip_next</mat-icon>
+	</button>
+	<app-reading-queue></app-reading-queue>
+	<span class="spacer" ></span>
+	<mat-form-field floatLabel="never" color="accent" class="form">
+		<input matInput placeholder="Upload music from Youtube " #urlInput>
+	</mat-form-field>
+	<button mat-icon-button (click)="sendCommand('#Y_DOWNLOAD ' + urlInput.value)">
+		<mat-icon>send</mat-icon>
+	</button>
+</mat-toolbar>
+>>>>>>> master

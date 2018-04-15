@@ -1,7 +1,9 @@
 package com.seikomi.janus.net;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Observable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +13,10 @@ import com.seikomi.janus.commands.Download;
 import com.seikomi.janus.commands.Exit;
 import com.seikomi.janus.commands.JanusCommand;
 import com.seikomi.janus.commands.Upload;
+import com.seikomi.janus.net.dispatcher.EventsDispatcher;
 import com.seikomi.janus.net.properties.JanusProperties;
 import com.seikomi.janus.net.tasks.ConnectTask;
+import com.seikomi.janus.net.tasks.TreatmentTask;
 import com.seikomi.janus.services.DataTranferService;
 import com.seikomi.janus.services.JanusService;
 import com.seikomi.janus.services.Locator;
@@ -27,12 +31,14 @@ import com.seikomi.janus.utils.Utils;
  * @author Nicolas SYMPHORIEN (nicolas.symphorien@gmail.com)
  *
  */
-public abstract class JanusServer implements NetworkApp {
+public abstract class JanusServer extends Observable implements NetworkApp {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JanusServer.class);
 
 	private JanusProperties serverProperties;
 
 	private ConnectTask connectTask;
+	private List<TreatmentTask> treatmentTasks = null;
+	private List<EventsDispatcher> eventsDispatchers = null;
 
 	/**
 	 * Create a new instance of Janus server and configure it with the
@@ -82,6 +88,9 @@ public abstract class JanusServer implements NetworkApp {
 
 			Thread connectTread = new Thread(connectTask, "ConnectThread");
 			connectTread.start();
+
+			treatmentTasks = connectTask.getTreatmentTasks();
+			eventsDispatchers = connectTask.getEventsDispatchTasks();
 
 			LOGGER.debug("Janus server start on port {} for command and on port {} for data",
 					getProperties("server.ports.command"), getProperties("server.ports.data"));
@@ -133,6 +142,14 @@ public abstract class JanusServer implements NetworkApp {
 	@Override
 	public String getProperties(String propertieName) {
 		return serverProperties.getProperties().getProperty(propertieName, null);
+	}
+
+	public List<TreatmentTask> getTreatmentTasks() {
+		return treatmentTasks;
+	}
+
+	public List<EventsDispatcher> getEventsDispatchers() {
+		return eventsDispatchers;
 	}
 
 }

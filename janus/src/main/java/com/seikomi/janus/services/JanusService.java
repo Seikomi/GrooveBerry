@@ -1,5 +1,7 @@
 package com.seikomi.janus.services;
 
+import java.util.Observable;
+
 import com.seikomi.janus.net.NetworkApp;
 
 /**
@@ -10,7 +12,7 @@ import com.seikomi.janus.net.NetworkApp;
  * @author Nicolas SYMPHORIEN (nicolas.symphorien@gmail.com)
  *
  */
-public abstract class JanusService {
+public abstract class JanusService extends Observable {
 
 	protected NetworkApp networkApp;
 
