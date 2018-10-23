@@ -3,8 +3,6 @@ package com.seikomi.janus.net.dispatcher;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Observable;
-import java.util.Observer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
