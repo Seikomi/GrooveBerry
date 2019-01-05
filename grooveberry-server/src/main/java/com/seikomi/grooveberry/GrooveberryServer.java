@@ -60,7 +60,7 @@ public class GrooveberryServer extends JanusServer implements Observer {
 	@Override
 	public void stop() {
 		Connection connection = ConnectionH2Database.getConnection();
-		runScript(connection, "sql/dropTables.sql");
+		runScript(connection, Utils.transformStringPath("sql/dropTables.sql").toString());
 
 		ConnectionH2Database.closeConnection();
 		ReadingQueue.getInstance().clearQueue();
@@ -130,7 +130,7 @@ public class GrooveberryServer extends JanusServer implements Observer {
 	private void initDatabase() {
 
 		Connection connection = ConnectionH2Database.getConnection();
-		runScript(connection, "sql/init.sql");
+		runScript(connection, Utils.transformStringPath("sql/init.sql").toString());
 	}
 
 	private void runScript(Connection connection, String filePath) {

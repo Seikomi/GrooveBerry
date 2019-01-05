@@ -65,11 +65,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>mysql</groupId>
-			<artifactId>mysql-connector-java</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>com.seikomi</groupId>
 			<artifactId>grooveberry-server</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
@@ -79,6 +74,18 @@
 			<groupId>com.seikomi</groupId>
 			<artifactId>janus</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.9.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>2.9.2</version>
 		</dependency>
 
 	</dependencies>
