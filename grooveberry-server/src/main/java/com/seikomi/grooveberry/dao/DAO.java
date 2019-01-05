@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.seikomi.grooveberry.database.ConnectionMySQLDatabase;
+import com.seikomi.grooveberry.database.ConnectionH2Database;
 
 /**
  * This abstract class gives the basic CRUD operations to implements in each DAO
@@ -20,7 +20,7 @@ public abstract class DAO<T> {
 	protected static final String SQL_TRACE_FORMAT = "SQL: {}";
 	
 	/** The H2 database connector. */
-	protected static Connection connection = ConnectionMySQLDatabase.getConnection();
+	protected static Connection connection = ConnectionH2Database.getConnection();
 
 	/**
 	 * Finds the object {@code T} in the database with his id.

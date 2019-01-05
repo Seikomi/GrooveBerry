@@ -29,8 +29,7 @@ public final class Utils {
 	/**
 	 * Check if the string {@code s} represent an integer of radix 10.
 	 * 
-	 * @param string
-	 *            the string to inspect
+	 * @param string the string to inspect
 	 * @return {@code true} the string {@code s} represent an integer of radix 10,
 	 *         {@code false} otherwise.
 	 */
@@ -41,10 +40,8 @@ public final class Utils {
 	/**
 	 * Check if the string {@code s} represent an integer of radix {@code radix}.
 	 * 
-	 * @param string
-	 *            the string to inspect
-	 * @param radix
-	 *            the radix to apply
+	 * @param string the string to inspect
+	 * @param radix  the radix to apply
 	 * @return {@code true} the string {@code s} represent an integer of radix
 	 *         {@code radix}, {@code false} otherwise.
 	 */
@@ -74,8 +71,7 @@ public final class Utils {
 	/**
 	 * Converts a {@code byte[]} variable in the corresponding long.
 	 * 
-	 * @param b
-	 *            the {@code byte[]} variable to convert.
+	 * @param b the {@code byte[]} variable to convert.
 	 * @return the corresponding long
 	 */
 	public static long bytesToLong(byte[] b) {
@@ -86,8 +82,7 @@ public final class Utils {
 	/**
 	 * Converts a {@code long} variable in the corresponding array of bytes.
 	 * 
-	 * @param i
-	 *            the {@code long} variable to convert.
+	 * @param i the {@code long} variable to convert.
 	 * @return the corresponding array of bytes (8 bytes)
 	 */
 	public static byte[] longToBytes(long i) {
@@ -99,9 +94,9 @@ public final class Utils {
 	public static Path transformStringPath(String stringPath) {
 		String transfromString = stringPath;
 
-		if (File.separator.equals(UNIX_SEPARATOR)) {
+		if (File.separator.equals(UNIX_SEPARATOR) && transfromString.contains(WINDOWS_SEPARATOR)) {
 			transfromString = transfromString.replaceAll(WINDOWS_SEPARATOR, File.separator);
-		} else if (File.separator.equals(WINDOWS_SEPARATOR)) {
+		} else if (File.separator.equals(WINDOWS_SEPARATOR)  && transfromString.contains(UNIX_SEPARATOR)) {
 			transfromString = transfromString.replaceAll(UNIX_SEPARATOR, "\\" + File.separator);
 		}
 
@@ -125,10 +120,8 @@ public final class Utils {
 	/**
 	 * Binary type.
 	 * 
-	 * @param <L>
-	 *            left assignment type
-	 * @param <R>
-	 *            right assignment type
+	 * @param <L> left assignment type
+	 * @param <R> right assignment type
 	 */
 	public static class Pair<L, R> {
 
@@ -138,10 +131,8 @@ public final class Utils {
 		/**
 		 * Construct a new Pair of two object one on the left, the other on the right.
 		 * 
-		 * @param left
-		 *            the object on the left
-		 * @param right
-		 *            the object on the right
+		 * @param left  the object on the left
+		 * @param right the object on the right
 		 */
 		public Pair(L left, R right) {
 			this.left = left;

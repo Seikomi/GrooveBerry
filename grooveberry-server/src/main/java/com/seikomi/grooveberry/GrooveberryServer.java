@@ -29,7 +29,7 @@ import com.seikomi.grooveberry.commands.WhatIsTheReadingQueue;
 import com.seikomi.grooveberry.commands.WhatIsThisSong;
 import com.seikomi.grooveberry.commands.YoutubeDownload;
 import com.seikomi.grooveberry.dao.SongDAO;
-import com.seikomi.grooveberry.database.ConnectionMySQLDatabase;
+import com.seikomi.grooveberry.database.ConnectionH2Database;
 import com.seikomi.grooveberry.services.ReadingQueueService;
 import com.seikomi.grooveberry.services.YoutubeTransfertService;
 import com.seikomi.grooveberry.utils.AudioFileDirectoryScanner;
@@ -73,7 +73,7 @@ public class GrooveberryServer extends JanusServer implements Observer {
 		String url = getProperties("database.url");
 		String user = getProperties("database.user");
 		String password = getProperties("database.password");
-		ConnectionMySQLDatabase.getConnection(url, user, password);
+		ConnectionH2Database.getConnection(url, user, password);
 
 		CommandsFactory.addCommand(new Play(), "#PLAY", this);
 		CommandsFactory.addCommand(new Next(), "#NEXT", this);
@@ -130,7 +130,7 @@ public class GrooveberryServer extends JanusServer implements Observer {
 
 	private void initDatabase() {
 
-		Connection connection = ConnectionMySQLDatabase.getConnection();
+		Connection connection = ConnectionH2Database.getConnection();
 		runScript(connection, "sql/init.sql");
 	}
 
