@@ -3,6 +3,8 @@ package com.seikomi.grooveberry.rest.controller;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +19,7 @@ public class GrooveberryCommandControlleur {
 	private GrooveberryClient grooveberryClient;
 	
 	@PostMapping("/command")
-    public String sendCommand(@RequestBody String command) throws InterruptedException {
+    public ResponseEntity<String> sendCommand(@RequestBody String command) throws InterruptedException {
 		String response = null;
         try {
 			response = grooveberryClient.executeCommand(command);
@@ -25,6 +27,6 @@ public class GrooveberryCommandControlleur {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return response;
+		return new ResponseEntity<String>(response, HttpStatus.OK);
     }
 }

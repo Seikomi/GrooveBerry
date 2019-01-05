@@ -1,2 +1,6 @@
 /target/
 /doc/
+/ffmpeg.exe
+/ffplay.exe
+/ffprobe.exe
+/youtube-dl.exe

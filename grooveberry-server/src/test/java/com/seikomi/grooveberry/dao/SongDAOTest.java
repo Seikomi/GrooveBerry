@@ -20,7 +20,7 @@ import org.junit.rules.ExternalResource;
 import com.seikomi.grooveberry.bo.Genre;
 import com.seikomi.grooveberry.bo.Song;
 import com.seikomi.grooveberry.bo.SongTag;
-import com.seikomi.grooveberry.database.ConnectionH2Database;
+//import com.seikomi.grooveberry.database.ConnectionH2Database;
 
 public class SongDAOTest {
 	private SongDAO songDAO;
@@ -32,7 +32,8 @@ public class SongDAOTest {
 
 		@Override
 		protected void before() throws Throwable {
-			connection = ConnectionH2Database.getConnection("jdbc:h2:mem:", "sa", "");
+//			connection = ConnectionH2Database.getConnection("jdbc:h2:mem:", "sa", "");
+			connection = null;
 			try (Statement statement = connection.createStatement()) {
 				ClassLoader classLoader = getClass().getClassLoader();
 				File initDatabaseFile = new File(classLoader.getResource("sql/init.sql").getFile());

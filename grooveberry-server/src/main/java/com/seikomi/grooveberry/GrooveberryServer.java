@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -27,9 +28,7 @@ import com.seikomi.grooveberry.commands.VolumeUp;
 import com.seikomi.grooveberry.commands.WhatIsTheReadingQueue;
 import com.seikomi.grooveberry.commands.WhatIsThisSong;
 import com.seikomi.grooveberry.commands.YoutubeDownload;
-import com.seikomi.grooveberry.dao.ReadingQueueDAO;
 import com.seikomi.grooveberry.dao.SongDAO;
-import com.seikomi.grooveberry.database.ConnectionH2Database;
 import com.seikomi.grooveberry.database.ConnectionMySQLDatabase;
 import com.seikomi.grooveberry.services.ReadingQueueService;
 import com.seikomi.grooveberry.services.YoutubeTransfertService;
@@ -53,7 +52,7 @@ public class GrooveberryServer extends JanusServer implements Observer {
 	@Override
 	public void start() {
 		initServerFiles();
-		initDatabase();
+		// initDatabase();
 		initReadingQueue();
 
 		super.start();
@@ -61,10 +60,10 @@ public class GrooveberryServer extends JanusServer implements Observer {
 
 	@Override
 	public void stop() {
-		Connection connection = ConnectionH2Database.getConnection();
-		runScript(connection, "sql/dropTables.sql");
-
-		ConnectionH2Database.closeConnection();
+		// Connection connection = ConnectionMySQLDatabase.getConnection();
+		// runScript(connection, "sql/dropTables.sql");
+		//
+		// ConnectionMySQLDatabase.closeConnection();
 		ReadingQueue.getInstance().clearQueue();
 		super.stop();
 	}
@@ -160,10 +159,20 @@ public class GrooveberryServer extends JanusServer implements Observer {
 				LOGGER.debug("Scanning audio files in directory : {}", directoryPath.toAbsolutePath());
 				AudioFileDirectoryScanner directoryScanner = new AudioFileDirectoryScanner(directoryPath);
 
-				LOGGER.debug("Populate the database");
-				for (Song song : directoryScanner.getSongList()) {
+				LOGGER.debug("Check diffences between the current scan and the audio files in the database.");
+				List<Song> songsFromDatabase = songDAO.findAll();
+				List<Song> songsFromScan = directoryScanner.getSongList();
+				List<Song> songsToCreate = getSongsToCreate(songsFromScan, songsFromDatabase);
+				List<Song> songsToDelete = getSongsToDelete(songsFromScan, songsFromDatabase);
+
+				LOGGER.debug("Update the database");
+				for (Song song : songsToCreate) {
 					songDAO.create(song);
 					LOGGER.debug("Loading song : {} in the database", song.getFileName());
+				}
+				for (Song song : songsToDelete) {
+					songDAO.delete(song);
+					LOGGER.debug("Delete song : {} in the database", song.getFileName());
 				}
 
 				LOGGER.debug("Loading audio files in reading queue");
@@ -178,6 +187,30 @@ public class GrooveberryServer extends JanusServer implements Observer {
 			LOGGER.error("Directory scanning error", e);
 		}
 
+	}
+
+	private List<Song> getSongsToDelete(List<Song> songsFromScan, List<Song> songsFromDatabase) {
+		List<Song> songsToReturn = new ArrayList<>();
+		for (Song songFromDatabase : songsFromDatabase) {
+			for (Song songFromScan : songsFromScan) {
+				if (songFromDatabase.getPath().equals(songFromScan.getPath())) {
+					songsToReturn.add(songFromDatabase);
+				}
+			}
+		}
+		return songsToReturn;
+	}
+
+	private List<Song> getSongsToCreate(List<Song> songsFromDatabase, List<Song> songsFromScan) {
+		List<Song> songsToReturn = new ArrayList<>();
+		for (Song songFromScan : songsFromScan) {
+			for (Song songFromDatabase : songsFromDatabase) {
+				if (songFromScan.getPath().equals(songFromDatabase.getPath())) {
+					songsToReturn.add(songFromScan);
+				}
+			}
+		}
+		return songsToReturn;
 	}
 
 	@Override
